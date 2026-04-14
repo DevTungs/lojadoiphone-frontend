@@ -137,7 +137,8 @@ export default function App() {
     // Check server health on app load
     const checkServerHealth = async () => {
       try {
-        const response = await fetch('/api/health', {
+        const apiUrl = import.meta.env.VITE_API_URL || '/api'
+        const response = await fetch(`${apiUrl}/health`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         })

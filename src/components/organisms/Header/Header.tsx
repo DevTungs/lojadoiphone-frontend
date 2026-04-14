@@ -27,6 +27,12 @@ export default function Header({ settings, onCartClick }: HeaderProps) {
   const { customer, isLoggedIn: isCustomerLoggedIn, logout: customerLogout } = useCustomerAuth();
   const navigate = useNavigate();
 
+  // Customer area takes precedence if both auth states exist in storage.
+  const isAdminSession = isAuthenticated && user?.role === 'admin';
+  const showCustomerSession = isCustomerLoggedIn;
+  const showAdminSession = !showCustomerSession && isAdminSession;
+  const showLoginButton = !showCustomerSession && !showAdminSession;
+
   const toggleMenu = () => setMenuOpen((prev) => !prev);
   const closeMenu = () => setMenuOpen(false);
 
@@ -105,7 +111,7 @@ export default function Header({ settings, onCartClick }: HeaderProps) {
           </button>
 
           {/* Entrar — cliente não logado e não é admin */}
-          {!isCustomerLoggedIn && !isAuthenticated && (
+          {showLoginButton && (
             <Link to="/login" className={styles.loginBtn}>
               <User size={16} strokeWidth={2} />
               Entrar
@@ -113,7 +119,7 @@ export default function Header({ settings, onCartClick }: HeaderProps) {
           )}
 
           {/* Cliente logado */}
-          {isCustomerLoggedIn && (
+          {showCustomerSession && (
             <div className={styles.userMenu}>
               <Link to="/minha-conta" className={styles.avatarBtn}>
                 <span className={styles.avatar}>
@@ -128,7 +134,7 @@ export default function Header({ settings, onCartClick }: HeaderProps) {
           )}
 
           {/* Auth — visível apenas para admin */}
-          {isAuthenticated && user?.role === 'admin' && (
+          {showAdminSession && (
             <div className={styles.userMenu}>
               <Link to="/admin" className={styles.avatarBtn}>
                 <span className={styles.avatar}>
@@ -170,12 +176,12 @@ export default function Header({ settings, onCartClick }: HeaderProps) {
             </Link>
           ))}
           <Link to="/pedido" className={styles.mobileNavLink} onClick={closeMenu}>Rastrear Pedido</Link>
-          {isCustomerLoggedIn ? (
+          {showCustomerSession ? (
             <>
               <Link to="/minha-conta" className={styles.mobileNavLink} onClick={closeMenu}>Minha Conta</Link>
               <button className={styles.mobileNavLink} onClick={() => { customerLogout(); closeMenu(); }}>Sair</button>
             </>
-          ) : isAuthenticated && user?.role === 'admin' ? (
+          ) : showAdminSession ? (
             <button className={styles.mobileNavLink} onClick={handleLogout}>Sair (Admin)</button>
           ) : (
             <Link to="/login" className={styles.mobileNavLink} onClick={closeMenu}>Entrar</Link>

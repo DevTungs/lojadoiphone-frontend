@@ -352,8 +352,15 @@
 
 /* ─── Responsive ── */
 @media (max-width: 768px) {
-  .inner   { padding: 0 20px; }
+  .inner   { padding: 0 12px; height: 68px; }
   .nav     { display: none; }
   .menuBtn { display: flex; }
+  .actions { gap: 10px; }
+  .logoImg { height: 36px; }
+  .avatarBtn { padding: 5px 8px; }
+  .avatar { width: 24px; height: 24px; }
+  .logoutBtn { display: none; }
+  .loginBtn { padding: 7px 12px; font-size: 12px; }
   .userName { display: none; }
+  .mobileMenu { top: 68px; }
 }

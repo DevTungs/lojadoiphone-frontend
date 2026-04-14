@@ -393,8 +393,12 @@
     min-height: auto;
   }
   .left    { align-items: center; padding: 64px 0 0; order: 2; }
-  .stage   { height: 58vw; min-height: 320px; order: 1; }
+  .stage   { height: clamp(320px, 72vw, 520px); min-height: 320px; order: 1; }
   .logoImg { height: 70px; }
+  .promoTop { top: 10%; }
+  .promoOfertaLabel { font-size: clamp(34px, 8vw, 52px); }
+  .carouselPrice { font-size: clamp(24px, 6vw, 34px); margin-bottom: 24px; }
+  .promoItemTitle { font-size: clamp(20px, 5.4vw, 28px); }
   .posCenter { width: min(320px, 44vw); }
   .posLeft   { width: min(140px, 18vw); transform: translate(calc(-50% - 13vw), -50%); }
   .posLeft:hover { filter: drop-shadow(0 20px 40px rgba(0,0,0,.7)) brightness(1.0); }
@@ -414,6 +418,17 @@
 @media (max-width: 540px) {
   .posLeft  { display: none; }
   .posRight { display: none; }
-  .posCenter { width: 78vw; }
-  .stage   { height: 62vw; }
+  .posCenter { width: min(84vw, 360px); }
+  .stage   { height: clamp(340px, 92vw, 480px); }
+  .promoTop { top: 8%; }
+  .promoOfertaLabel { font-size: clamp(26px, 10vw, 42px); }
+  .carouselPrice { font-size: clamp(18px, 8vw, 30px); margin-bottom: 10px; }
+  .carousel { bottom: 6%; max-width: 92vw; }
+  .promoItemTitle {
+    white-space: normal;
+    text-align: center;
+    line-height: 1.15;
+    max-width: 92vw;
+    text-wrap: balance;
+  }
 }

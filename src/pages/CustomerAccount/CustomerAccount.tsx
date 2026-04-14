@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Package, LogOut, CheckCircle, Clock, AlertCircle, Home, User, Mail, Phone, Edit2, MessageCircle } from 'lucide-react'
 import { useCustomerAuth } from '../../contexts/CustomerAuthContext'
 import { formatCurrency } from '../../utils/formatters'
+import { buildApiUrl } from '../../services/api'
 import Button from '../../components/atoms/Button/Button'
 import Input from '../../components/atoms/Input/Input'
 import styles from './CustomerAccount.module.css'
@@ -75,13 +76,13 @@ export default function CustomerAccount() {
     }
 
     Promise.all([
-      fetch('/api/customers/me', {
+      fetch(buildApiUrl('/customers/me'), {
         headers: { Authorization: `Bearer ${token}` },
       }).then((r) => r.json()),
-      fetch('/api/customers/me/orders', {
+      fetch(buildApiUrl('/customers/me/orders'), {
         headers: { Authorization: `Bearer ${token}` },
       }).then((r) => r.json()),
-      fetch('/api/settings').then((r) => r.json()),
+      fetch(buildApiUrl('/settings')).then((r) => r.json()),
     ])
       .then(([customerData, ordersData, settingsData]) => {
         setCustomer(customerData)

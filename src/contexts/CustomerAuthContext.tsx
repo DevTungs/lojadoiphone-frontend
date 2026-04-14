@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import axios from 'axios';
+import api from '../services/api';
 
 export interface CustomerUser {
   id: number;
@@ -39,20 +41,26 @@ export function CustomerAuthProvider({ children }: { children: React.ReactNode }
   }, []);
 
   const login = useCallback(async (phone: string, password: string): Promise<void> => {
-    const response = await fetch('/api/customers/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, password }),
-    });
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err?.error ?? 'Erro ao fazer login');
+    try {
+      const response = await api.post<{ token: string; customer: CustomerUser }>('/customers/login', {
+        phone,
+        password,
+      });
+      const data = response.data;
+      localStorage.setItem(CUSTOMER_TOKEN_KEY, data.token);
+      localStorage.setItem(CUSTOMER_USER_KEY, JSON.stringify(data.customer));
+      setToken(data.token);
+      setCustomer(data.customer);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const apiMessage =
+          (error.response?.data as { error?: string; message?: string } | undefined)?.error ??
+          (error.response?.data as { error?: string; message?: string } | undefined)?.message ??
+          'Erro ao fazer login';
+        throw new Error(apiMessage);
+      }
+      throw error;
     }
-    const data: { token: string; customer: CustomerUser } = await response.json();
-    localStorage.setItem(CUSTOMER_TOKEN_KEY, data.token);
-    localStorage.setItem(CUSTOMER_USER_KEY, JSON.stringify(data.customer));
-    setToken(data.token);
-    setCustomer(data.customer);
   }, []);
 
   const logout = useCallback(() => {

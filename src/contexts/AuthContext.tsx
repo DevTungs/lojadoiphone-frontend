@@ -5,6 +5,8 @@ import React, {
   useState,
   useCallback,
 } from 'react';
+import axios from 'axios';
+import api from '../services/api';
 
 export interface User {
   id: number;
@@ -50,28 +52,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = useCallback(async (email: string, password: string): Promise<void> => {
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const response = await api.post<{ token: string; user: User }>('/auth/login', {
+        email,
+        password,
+      });
+      const data = response.data;
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(
-        errorData?.message ?? `Login failed with status ${response.status}`
-      );
+      localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
+
+      setToken(data.token);
+      setUser(data.user);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const apiMessage =
+          (error.response?.data as { message?: string } | undefined)?.message ??
+          `Login failed with status ${error.response?.status ?? 'unknown'}`;
+        throw new Error(apiMessage);
+      }
+      throw error;
     }
-
-    const data: { token: string; user: User } = await response.json();
-
-    localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
-    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
-
-    setToken(data.token);
-    setUser(data.user);
   }, []);
 
   const logout = useCallback(() => {

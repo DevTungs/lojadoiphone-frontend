@@ -11,8 +11,16 @@ import type {
   Promotion,
 } from '../types/index';
 
+const rawApiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+export const API_BASE_URL = String(rawApiBaseUrl).replace(/\/+$/, '');
+
+export const buildApiUrl = (path: string): string => {
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return `${API_BASE_URL}${normalizedPath}`;
+};
+
 const api: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: API_BASE_URL,
 });
 
 // Request interceptor: attach JWT token from localStorage

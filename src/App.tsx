@@ -6,6 +6,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import { useAuth } from './contexts/AuthContext'
 import { CustomerAuthProvider } from './contexts/CustomerAuthContext'
 import { getSettings } from './services/api'
+import { buildApiUrl } from './services/api'
 import { assetUrl } from './utils/assetUrl'
 import Home from './pages/Home'
 import OrderTracking from './pages/OrderTracking'
@@ -137,8 +138,7 @@ export default function App() {
     // Check server health on app load
     const checkServerHealth = async () => {
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || '/api'
-        const response = await fetch(`${apiUrl}/health`, {
+        const response = await fetch(buildApiUrl('/health'), {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         })

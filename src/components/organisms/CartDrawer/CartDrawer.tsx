@@ -5,6 +5,7 @@ import { useCart } from '../../../contexts/CartContext';
 import { useCustomerAuth } from '../../../contexts/CustomerAuthContext';
 import { formatCurrency } from '../../../utils/formatters';
 import { assetUrl } from '../../../utils/assetUrl';
+import { buildApiUrl } from '../../../services/api';
 import styles from './CartDrawer.module.css';
 
 interface CartDrawerProps {
@@ -29,7 +30,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onFinalize, on
   useEffect(() => {
     const fetchSellers = async () => {
       try {
-        const response = await fetch('/api/sellers');
+        const response = await fetch(buildApiUrl('/sellers'));
         if (response.ok) {
           const data = await response.json();
           setSellers(data);
@@ -106,7 +107,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onFinalize, on
 
     setIsSubmitting(true);
     try {
-      const response = await fetch('/api/orders', {
+      const response = await fetch(buildApiUrl('/orders'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

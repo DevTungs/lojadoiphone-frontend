@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
+import type { TouchEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import Button from '../../atoms/Button/Button';
@@ -24,8 +25,63 @@ const ITEMS = [
 export default function HeroSection({ logoUrl, storeName, promotions = [] }: HeroSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef   = useRef<HTMLDivElement>(null);
+  const touchStartXRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
+  const hasSwipedRef = useRef(false);
   const navigate = useNavigate();
   const [activeIdx, setActiveIdx] = useState(0);
+
+  const totalItems = promotions.length > 0 ? promotions.length : ITEMS.length;
+
+  const goToNext = () => {
+    if (totalItems <= 1) return;
+    setActiveIdx((prev) => (prev + 1) % totalItems);
+  };
+
+  const goToPrev = () => {
+    if (totalItems <= 1) return;
+    setActiveIdx((prev) => (prev - 1 + totalItems) % totalItems);
+  };
+
+  const handleTouchStart = (e: TouchEvent<HTMLDivElement>) => {
+    const touch = e.touches[0];
+    if (!touch) return;
+    touchStartXRef.current = touch.clientX;
+    touchStartYRef.current = touch.clientY;
+    hasSwipedRef.current = false;
+  };
+
+  const handleTouchMove = (e: TouchEvent<HTMLDivElement>) => {
+    if (touchStartXRef.current === null || touchStartYRef.current === null) return;
+
+    const touch = e.touches[0];
+    if (!touch) return;
+
+    const deltaX = touch.clientX - touchStartXRef.current;
+    const deltaY = touch.clientY - touchStartYRef.current;
+
+    // Avoid capturing vertical page scroll gestures.
+    if (Math.abs(deltaY) > Math.abs(deltaX)) return;
+
+    const swipeThreshold = 38;
+    if (!hasSwipedRef.current && Math.abs(deltaX) >= swipeThreshold) {
+      if (deltaX < 0) {
+        goToNext();
+      } else {
+        goToPrev();
+      }
+
+      hasSwipedRef.current = true;
+      touchStartXRef.current = touch.clientX;
+      touchStartYRef.current = touch.clientY;
+    }
+  };
+
+  const handleTouchEnd = () => {
+    touchStartXRef.current = null;
+    touchStartYRef.current = null;
+    hasSwipedRef.current = false;
+  };
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -54,8 +110,14 @@ export default function HeroSection({ logoUrl, storeName, promotions = [] }: Her
     };
   }, []);
 
+  useEffect(() => {
+    if (activeIdx >= totalItems) {
+      setActiveIdx(0);
+    }
+  }, [activeIdx, totalItems]);
+
   const getPos = (i: number): 'center' | 'left' | 'right' | 'hidden' => {
-    const len  = ITEMS.length;
+    const len  = totalItems;
     const diff = ((i - activeIdx) + len) % len;
     if (diff === 0)       return 'center';
     if (diff === 1)       return 'right';
@@ -100,6 +162,9 @@ export default function HeroSection({ logoUrl, storeName, promotions = [] }: Her
         <div
           ref={stageRef}
           className={`${styles.stage} ${promotions.length > 0 ? styles.stagePromotion : ''}`}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           <div className={styles.glow} />
           <div className={styles.glowCyan} />

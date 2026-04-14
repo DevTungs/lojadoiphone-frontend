@@ -418,12 +418,31 @@
 @media (max-width: 540px) {
   .posLeft  { display: none; }
   .posRight { display: none; }
-  .posCenter { width: min(84vw, 360px); }
-  .stage   { height: clamp(340px, 92vw, 480px); }
-  .promoTop { top: 8%; }
-  .promoOfertaLabel { font-size: clamp(26px, 10vw, 42px); }
-  .carouselPrice { font-size: clamp(18px, 8vw, 30px); margin-bottom: 10px; }
-  .carousel { bottom: 6%; max-width: 92vw; }
+  .posCenter {
+    width: min(74vw, 300px);
+    animation: floatCenterMobile 4.5s ease-in-out infinite;
+  }
+  .stage   { height: clamp(360px, 96vw, 500px); }
+  .promoTop {
+    top: 4%;
+    width: min(92vw, 360px);
+    gap: 6px;
+  }
+  .promoOfertaLabel {
+    font-size: clamp(26px, 9vw, 40px);
+    line-height: 1.05;
+  }
+  .carouselPrice {
+    font-size: clamp(24px, 7vw, 32px);
+    line-height: 1.05;
+    margin-bottom: 0;
+  }
+  .carousel {
+    bottom: 3%;
+    max-width: 92vw;
+    width: min(92vw, 360px);
+    gap: 8px;
+  }
   .promoItemTitle {
     white-space: normal;
     text-align: center;
@@ -431,4 +450,19 @@
     max-width: 92vw;
     text-wrap: balance;
   }
+}
+
+@media (max-width: 400px) {
+  .stage { height: clamp(350px, 100vw, 470px); }
+  .posCenter { width: min(72vw, 270px); }
+  .promoTop { top: 3%; }
+  .promoOfertaLabel { font-size: clamp(24px, 8.6vw, 34px); }
+  .carouselPrice { font-size: clamp(20px, 6.8vw, 28px); }
+  .promoItemTitle { font-size: clamp(17px, 6vw, 22px); }
+  .carousel { bottom: 2.5%; }
+}
+
+@keyframes floatCenterMobile {
+  0%,100% { transform: translate(-50%, -45%) translateY(0); }
+  50%     { transform: translate(-50%, -45%) translateY(-10px); }
 }

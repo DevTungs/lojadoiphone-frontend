@@ -65,6 +65,15 @@
   z-index: 201;
 }
 
+.dropdown::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 8px;
+}
+
 .chevron {
   display: inline-block;
   vertical-align: middle;

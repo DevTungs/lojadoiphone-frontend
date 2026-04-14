@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import axios from 'axios';
 import api from '../services/api';
 
 export interface CustomerUser {
@@ -41,26 +40,29 @@ export function CustomerAuthProvider({ children }: { children: React.ReactNode }
   }, []);
 
   const login = useCallback(async (phone: string, password: string): Promise<void> => {
-    try {
-      const response = await api.post<{ token: string; customer: CustomerUser }>('/customers/login', {
-        phone,
-        password,
-      });
-      const data = response.data;
-      localStorage.setItem(CUSTOMER_TOKEN_KEY, data.token);
-      localStorage.setItem(CUSTOMER_USER_KEY, JSON.stringify(data.customer));
-      setToken(data.token);
-      setCustomer(data.customer);
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const apiMessage =
-          (error.response?.data as { error?: string; message?: string } | undefined)?.error ??
-          (error.response?.data as { error?: string; message?: string } | undefined)?.message ??
-          'Erro ao fazer login';
-        throw new Error(apiMessage);
-      }
-      throw error;
+    const response = await api.post<{ token: string; customer: CustomerUser } | { error?: string; message?: string }>(
+      '/customers/login',
+      { phone, password },
+      { validateStatus: (status) => status < 500 }
+    );
+
+    if (response.status === 401) {
+      const apiMessage =
+        (response.data as { error?: string; message?: string } | undefined)?.error ??
+        (response.data as { error?: string; message?: string } | undefined)?.message ??
+        'Telefone ou senha incorretos.';
+      throw new Error(apiMessage);
     }
+
+    if (response.status < 200 || response.status >= 300) {
+      throw new Error('Erro ao fazer login');
+    }
+
+    const data = response.data as { token: string; customer: CustomerUser };
+    localStorage.setItem(CUSTOMER_TOKEN_KEY, data.token);
+    localStorage.setItem(CUSTOMER_USER_KEY, JSON.stringify(data.customer));
+    setToken(data.token);
+    setCustomer(data.customer);
   }, []);
 
   const logout = useCallback(() => {

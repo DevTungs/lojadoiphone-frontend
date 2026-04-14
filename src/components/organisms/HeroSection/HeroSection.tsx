@@ -97,7 +97,10 @@ export default function HeroSection({ logoUrl, storeName, promotions = [] }: Her
         </div>
 
         {/* ── DIREITA ── */}
-        <div ref={stageRef} className={styles.stage}>
+        <div
+          ref={stageRef}
+          className={`${styles.stage} ${promotions.length > 0 ? styles.stagePromotion : ''}`}
+        >
           <div className={styles.glow} />
           <div className={styles.glowCyan} />
 

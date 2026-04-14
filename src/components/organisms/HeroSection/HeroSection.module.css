@@ -104,6 +104,10 @@
   will-change: transform;
 }
 
+.stagePromotion {
+  isolation: isolate;
+}
+
 /* glow verde principal */
 .glow {
   position: absolute;
@@ -450,6 +454,52 @@
     max-width: 92vw;
     text-wrap: balance;
   }
+
+  .stagePromotion {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    padding-top: 18px;
+  }
+
+  .stagePromotion .promoTop {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    order: 1;
+    width: min(92vw, 360px);
+    gap: 4px;
+  }
+
+  .stagePromotion .phoneItem.posCenter {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    order: 2;
+    width: min(72vw, 280px);
+    margin: 4px 0;
+    animation: none;
+  }
+
+  .stagePromotion .carousel {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    order: 3;
+    width: min(92vw, 360px);
+    max-width: 92vw;
+    gap: 8px;
+  }
+
+  .stagePromotion .promoItemTitle {
+    font-size: clamp(16px, 6.2vw, 24px);
+    max-width: 88vw;
+  }
 }
 
 @media (max-width: 400px) {
@@ -460,6 +510,15 @@
   .carouselPrice { font-size: clamp(20px, 6.8vw, 28px); }
   .promoItemTitle { font-size: clamp(17px, 6vw, 22px); }
   .carousel { bottom: 2.5%; }
+
+  .stagePromotion {
+    gap: 8px;
+    padding-top: 14px;
+  }
+
+  .stagePromotion .phoneItem.posCenter {
+    width: min(70vw, 250px);
+  }
 }
 
 @keyframes floatCenterMobile {

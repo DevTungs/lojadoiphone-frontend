@@ -1,0 +1,24 @@
+/* ─── InfoBar ─────────────────────────────────────────────────────────────── */
+.section {
+  background: var(--gray-50);
+  padding: 40px 24px;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.wrapper {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

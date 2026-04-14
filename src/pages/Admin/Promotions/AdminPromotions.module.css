@@ -1,0 +1,220 @@
+.toolbar {
+  margin-bottom: 24px;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  padding: 48px 0;
+}
+
+.empty {
+  text-align: center;
+  color: var(--gray-400);
+  padding: 48px 0;
+  font-size: 15px;
+}
+
+/* Table */
+.table {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.tableHeader,
+.tableRow {
+  display: grid;
+  grid-template-columns: 64px 1fr 120px 80px 100px 80px;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+}
+
+.tableHeader {
+  background: var(--gray-50);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.tableRow {
+  border-bottom: 1px solid var(--gray-100);
+  font-size: 14px;
+  color: var(--gray-700);
+}
+
+.tableRow:last-child { border-bottom: none; }
+
+.imgCell { display: flex; align-items: center; }
+
+.thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--gray-200);
+}
+
+.thumbEmpty {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+}
+
+.titleCell {
+  font-weight: 500;
+  color: var(--gray-900);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.iconBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--gray-200);
+  background: var(--white);
+  color: var(--gray-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.iconBtn:hover { border-color: var(--mint); color: var(--mint); background: var(--mint-alpha-10); }
+.iconBtn.danger:hover { border-color: var(--red-500); color: var(--red-500); background: var(--red-light); }
+
+/* Modal */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modal {
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 24px 0;
+}
+
+.modalHeader h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: var(--gray-400);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  transition: var(--transition-fast);
+}
+.closeBtn:hover { color: var(--gray-700); }
+
+.form {
+  padding: 20px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Upload */
+.uploadArea {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.uploadLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+.preview {
+  width: 100%;
+  max-height: 160px;
+  object-fit: contain;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gray-200);
+}
+
+.uploadBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1px dashed var(--gray-300);
+  border-radius: var(--radius-md);
+  background: var(--gray-50);
+  color: var(--gray-600);
+  font-size: 14px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+.uploadBtn:hover { border-color: var(--mint); color: var(--mint); background: var(--mint-alpha-10); }
+.uploadBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.urlHint {
+  font-size: 11px;
+  color: var(--gray-400);
+  margin: 0;
+  word-break: break-all;
+}
+
+.checkLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--gray-700);
+  cursor: pointer;
+}
+
+.formError {
+  font-size: 13px;
+  color: var(--red-500);
+  margin: 0;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 4px;
+}

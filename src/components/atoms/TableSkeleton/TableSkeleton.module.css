@@ -1,0 +1,17 @@
+.row td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--gray-50);
+}
+
+.shimmer {
+  height: 14px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 50%, var(--gray-100) 75%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}

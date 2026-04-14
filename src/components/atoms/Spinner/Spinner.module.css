@@ -1,0 +1,49 @@
+.spinner {
+  display: inline-block;
+  border-radius: var(--radius-full);
+  border-style: solid;
+  border-color: transparent;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+/* Sizes */
+.sm {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+}
+
+.md {
+  width: 20px;
+  height: 20px;
+  border-width: 2px;
+}
+
+.lg {
+  width: 28px;
+  height: 28px;
+  border-width: 3px;
+}
+
+/* Colors — only the top border is colored to create the spinning arc */
+.mint {
+  border-top-color: var(--mint);
+}
+
+.white {
+  border-top-color: var(--white);
+}
+
+.gray {
+  border-top-color: var(--gray-400);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

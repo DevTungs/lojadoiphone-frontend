@@ -1,0 +1,550 @@
+/* ─── Contadores por status ─────────────────────────────────── */
+.statusCounters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.counterChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-full);
+  background: var(--white);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  font-family: var(--font);
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.counterChip:hover {
+  border-color: var(--gray-300);
+  color: var(--gray-800);
+}
+
+.counterChipActive {
+  border-color: var(--mint);
+  color: var(--mint-dark);
+  background: var(--mint-alpha-10);
+  font-weight: var(--weight-semibold);
+}
+
+.counterDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.counterBadge {
+  background: var(--gray-100);
+  color: var(--gray-600);
+  border-radius: var(--radius-full);
+  padding: 1px 6px;
+  font-size: 11px;
+  font-weight: var(--weight-semibold);
+  min-width: 18px;
+  text-align: center;
+}
+
+/* ─── Barra de filtros ─────────────────────────────────────── */
+.filterBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.searchWrapper {
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gray-400);
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 9px 14px 9px 36px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-family: var(--font);
+  color: var(--gray-900);
+  background: var(--white);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.searchInput:focus {
+  border-color: var(--mint);
+}
+
+.dateFilters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.dateLabel {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--gray-500);
+  white-space: nowrap;
+}
+
+.dateInput {
+  padding: 8px 12px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-family: var(--font);
+  color: var(--gray-800);
+  background: var(--white);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.dateInput:focus {
+  border-color: var(--mint);
+}
+
+.clearBtn {
+  padding: 8px 14px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  background: var(--white);
+  font-size: var(--text-sm);
+  font-family: var(--font);
+  color: var(--gray-500);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.clearBtn:hover {
+  border-color: var(--gray-400);
+  color: var(--gray-700);
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--white);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: var(--text-xs);
+  color: var(--gray-500);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--gray-100);
+  background: var(--gray-50);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--gray-50);
+  font-size: var(--text-sm);
+  color: var(--gray-700);
+  vertical-align: middle;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover td {
+  background: var(--gray-50);
+}
+
+.orderId {
+  font-weight: var(--weight-semibold);
+  color: var(--gray-500) !important;
+  font-size: var(--text-xs) !important;
+}
+
+.customerName {
+  font-weight: var(--weight-medium);
+  color: var(--gray-900) !important;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+
+.emptyRow {
+  text-align: center;
+  color: var(--gray-400);
+  padding: 40px 16px !important;
+}
+
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.errorText {
+  color: var(--red-500);
+  font-size: var(--text-base);
+}
+
+/* ─── Inline status select ──────────────────────────────────── */
+.inlineStatusWrapper {
+  display: flex;
+  align-items: center;
+}
+
+.inlineStatusSelect {
+  padding: 4px 10px;
+  border: 1.5px solid;
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  font-family: var(--font);
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='currentColor' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 24px;
+  transition: opacity 0.15s ease;
+}
+
+.inlineStatusSelect:hover {
+  opacity: 0.85;
+}
+
+/* ─── Action buttons ────────────────────────────────────────── */
+.actionBtns {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.iconBtn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  color: var(--gray-500);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
+}
+
+.iconBtn:hover {
+  background: var(--mint-alpha-10);
+  color: var(--mint);
+  border-color: var(--mint-medium);
+}
+
+.whatsappBtn:hover {
+  background: #25d36615;
+  color: #25d366;
+  border-color: #25d36650;
+}
+
+/* ─── WhatsApp modal button ─────────────────────────────────── */
+.modalHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.whatsappModalBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1.5px solid #25d36660;
+  border-radius: var(--radius-full);
+  background: #25d36610;
+  color: #25d366;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  font-family: var(--font);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.whatsappModalBtn:hover {
+  background: #25d36620;
+  border-color: #25d366;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modalCard {
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.modalTitle {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.closeBtn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: var(--gray-100);
+  border-radius: var(--radius-full);
+  color: var(--gray-500);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
+}
+
+.closeBtn:hover {
+  background: var(--gray-200);
+  color: var(--gray-800);
+}
+
+.detailContent {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.detailItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detailLabel {
+  font-size: var(--text-xs);
+  color: var(--gray-500);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.detailValue {
+  font-size: var(--text-sm);
+  color: var(--gray-900);
+  font-weight: var(--weight-medium);
+}
+
+.sectionTitle {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--gray-700);
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.itemsSection,
+.statusSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.itemsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.orderItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--gray-50);
+  border-radius: var(--radius-sm);
+}
+
+.itemName {
+  flex: 1;
+  font-size: var(--text-sm);
+  color: var(--gray-800);
+  font-weight: var(--weight-medium);
+}
+
+.itemQty {
+  font-size: var(--text-sm);
+  color: var(--gray-500);
+}
+
+.itemPrice {
+  font-size: var(--text-sm);
+  color: var(--gray-900);
+  font-weight: var(--weight-semibold);
+}
+
+.statusGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.statusOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  color: var(--gray-600);
+  font-size: var(--text-sm);
+  font-family: var(--font);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  text-align: left;
+}
+
+.statusOption:hover {
+  background: var(--gray-50);
+  border-color: var(--gray-300);
+  color: var(--gray-800);
+}
+
+.statusOptionSelected {
+  font-weight: var(--weight-semibold);
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.saveStatusBtn {
+  width: 100%;
+}
+
+/* History */
+.historySection {
+  display: flex;
+  flex-direction: column;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.historyItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--gray-50);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--mint);
+}
+
+.historyInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.historyAdmin {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+.historyChange {
+  font-size: 12px;
+  color: var(--gray-500);
+}
+
+.historyFrom {
+  color: var(--gray-400);
+}
+
+.historyTo {
+  color: var(--mint-dark);
+  font-weight: 600;
+}
+
+.historyDate {
+  font-size: 11px;
+  color: var(--gray-400);
+  white-space: nowrap;
+}

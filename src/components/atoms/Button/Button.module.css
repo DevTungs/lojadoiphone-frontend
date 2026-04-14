@@ -1,0 +1,130 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+  transition: var(--transition);
+  cursor: pointer;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Sizes */
+.sm {
+  padding: 8px 16px;
+  font-size: var(--text-sm);
+  border-radius: var(--radius-full);
+}
+
+.md {
+  padding: 12px 24px;
+  font-size: var(--text-base);
+  border-radius: var(--radius-full);
+}
+
+.lg {
+  padding: 14px 32px;
+  font-size: var(--text-md);
+  border-radius: var(--radius-full);
+}
+
+/* Variants */
+.primary {
+  background: var(--mint-gradient);
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 209, 163, 0.28);
+  font-weight: 600;
+}
+
+.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(0, 209, 163, 0.42);
+}
+
+.primary:active {
+  transform: translateY(0);
+}
+
+.secondary {
+  background: var(--gray-100);
+  color: var(--gray-800);
+  border: 1px solid var(--gray-200);
+}
+
+.secondary:hover {
+  background: var(--gray-200);
+  color: var(--gray-900);
+}
+
+.secondary:active {
+  background: var(--gray-300);
+}
+
+.ghost {
+  background: transparent;
+  color: var(--gray-600);
+}
+
+.ghost:hover {
+  background: var(--gray-100);
+  color: var(--gray-900);
+}
+
+.ghost:active {
+  background: var(--gray-200);
+}
+
+.danger {
+  background: var(--red-500);
+  color: var(--white);
+}
+
+.danger:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+}
+
+.danger:active {
+  transform: translateY(0);
+}
+
+.outline {
+  background: transparent;
+  border: 1.5px solid var(--mint);
+  color: var(--mint);
+}
+
+.outline:hover {
+  background: var(--mint-alpha-10);
+}
+
+.outline:active {
+  background: var(--mint-alpha-20);
+}
+
+/* Modifiers */
+.fullWidth {
+  width: 100%;
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Loading state */
+.loading {
+  cursor: wait;
+  pointer-events: none;
+}
+
+.loadingContent {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}

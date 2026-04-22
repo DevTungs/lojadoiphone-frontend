@@ -218,3 +218,38 @@
   gap: 12px;
   margin-top: 4px;
 }
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .tableHeader {
+    display: none;
+  }
+
+  .tableRow {
+    grid-template-columns: 64px 1fr 80px;
+    grid-template-rows: auto auto;
+  }
+
+  .tableRow > *:nth-child(4),
+  .tableRow > *:nth-child(5) {
+    display: none;
+  }
+
+  .overlay {
+    padding: 12px;
+    align-items: flex-end;
+  }
+
+  .modal {
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
+
+  .modalFooter {
+    flex-direction: column-reverse;
+  }
+
+  .modalFooter > * {
+    width: 100%;
+  }
+}

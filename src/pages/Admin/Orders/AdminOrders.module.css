@@ -548,3 +548,64 @@
   color: var(--gray-400);
   white-space: nowrap;
 }
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .filterBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchWrapper {
+    min-width: 0;
+  }
+
+  .dateFilters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .dateInput {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .modal {
+    padding: 12px;
+    align-items: flex-end;
+  }
+
+  .modalCard {
+    padding: 20px 16px;
+    max-height: 92vh;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
+
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .statusGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .modalHeader {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .modalHeaderActions {
+    flex-wrap: wrap;
+  }
+
+  .statusCounters {
+    gap: 6px;
+  }
+
+  .counterChip {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+}

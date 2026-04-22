@@ -8,10 +8,35 @@
   margin-left: 240px;
   flex: 1;
   padding: 32px;
+  min-width: 0;
 }
 
 .pageHeader {
   margin-bottom: 32px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.hamburger {
+  display: none;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md, 10px);
+  background: var(--white);
+  color: var(--gray-600);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+  margin-top: 2px;
+}
+
+.hamburger:hover {
+  background: var(--gray-100);
+  color: var(--gray-900);
 }
 
 .pageTitle {
@@ -30,5 +55,13 @@
   .content {
     margin-left: 0;
     padding: 16px;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .pageTitle {
+    font-size: 20px;
   }
 }

@@ -203,3 +203,24 @@
 .fileInputHidden {
   display: none;
 }
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .cardHeader {
+    padding: 20px 16px 16px;
+  }
+
+  .form {
+    padding: 16px 16px 24px;
+  }
+
+  .errorBanner,
+  .successBanner {
+    margin: 12px 16px 0;
+  }
+
+  .imageTabs {
+    flex-wrap: wrap;
+  }
+}

@@ -1,5 +1,5 @@
-import React from 'react';
-import { Award } from 'lucide-react';
+import React, { useState } from 'react';
+import { Award, X } from 'lucide-react';
 import type { Seller } from '../../../types/index';
 import SellerBar from '../../molecules/SellerBar/SellerBar';
 import styles from './SellerRanking.module.css';
@@ -9,17 +9,25 @@ interface SellerRankingProps {
 }
 
 const SellerRanking: React.FC<SellerRankingProps> = ({ sellers }) => {
+  const [fullscreen, setFullscreen] = useState(false);
+
   const totalSales = sellers.reduce((sum, seller) => sum + (seller.sales_count ?? 0), 0);
   const maxSales = sellers.length > 0 ? Math.max(...sellers.map((s) => s.sales_count ?? 0)) : 0;
 
   const sorted = [...sellers].sort((a, b) => (b.sales_count ?? 0) - (a.sales_count ?? 0));
 
-  return (
-    <section className={styles.container}>
+  const content = (
+    <>
       <div className={styles.header}>
         <div className={styles.titleRow}>
           <Award size={22} className={styles.icon} />
-          <h2 className={styles.title}>Ranking de Vendedores</h2>
+          <button
+            className={styles.titleBtn}
+            onClick={() => setFullscreen(true)}
+            title="Ver em tela cheia"
+          >
+            Ranking de Vendedores
+          </button>
         </div>
         {sellers.length > 0 && (
           <p className={styles.subtitle}>
@@ -48,7 +56,26 @@ const SellerRanking: React.FC<SellerRankingProps> = ({ sellers }) => {
           ))}
         </div>
       )}
-    </section>
+    </>
+  );
+
+  return (
+    <>
+      <section className={styles.container}>
+        {content}
+      </section>
+
+      {fullscreen && (
+        <div className={styles.overlay} onClick={() => setFullscreen(false)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <button className={styles.closeBtn} onClick={() => setFullscreen(false)}>
+              <X size={20} />
+            </button>
+            {content}
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

@@ -9,6 +9,7 @@ import {
   Settings,
   LogOut,
   Tag,
+  X,
 } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
 import styles from './AdminSidebar.module.css';
@@ -29,7 +30,12 @@ const navItems: NavItem[] = [
   { label: 'Configurações', path: '/admin/configuracoes', icon: <Settings size={18} /> },
 ];
 
-const AdminSidebar: React.FC = () => {
+interface AdminSidebarProps {
+  open?: boolean;
+  onClose?: () => void;
+}
+
+const AdminSidebar: React.FC<AdminSidebarProps> = ({ open, onClose }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout } = useAuth();
@@ -46,32 +52,49 @@ const AdminSidebar: React.FC = () => {
     navigate('/');
   };
 
+  const handleNavClick = () => {
+    onClose?.();
+  };
+
   return (
-    <aside className={styles.sidebar}>
-      <div className={styles.logo}>
-        <span>Loja do iPhone</span>
-      </div>
-
-      <nav className={styles.nav}>
-        {navItems.map((item) => (
-          <Link
-            key={item.path}
-            to={item.path}
-            className={`${styles.navItem} ${isActive(item.path) ? styles.active : ''}`}
+    <>
+      {open && (
+        <div className={styles.backdrop} onClick={onClose} aria-hidden="true" />
+      )}
+      <aside className={`${styles.sidebar} ${open ? styles.sidebarOpen : ''}`}>
+        <div className={styles.logo}>
+          <span>Loja do iPhone</span>
+          <button
+            className={styles.closeBtn}
+            onClick={onClose}
+            aria-label="Fechar menu"
           >
-            {item.icon}
-            <span>{item.label}</span>
-          </Link>
-        ))}
-      </nav>
+            <X size={18} />
+          </button>
+        </div>
 
-      <div className={styles.bottom}>
-        <button className={styles.logoutBtn} onClick={handleLogout}>
-          <LogOut size={18} />
-          <span>Sair</span>
-        </button>
-      </div>
-    </aside>
+        <nav className={styles.nav}>
+          {navItems.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={`${styles.navItem} ${isActive(item.path) ? styles.active : ''}`}
+              onClick={handleNavClick}
+            >
+              {item.icon}
+              <span>{item.label}</span>
+            </Link>
+          ))}
+        </nav>
+
+        <div className={styles.bottom}>
+          <button className={styles.logoutBtn} onClick={handleLogout}>
+            <LogOut size={18} />
+            <span>Sair</span>
+          </button>
+        </div>
+      </aside>
+    </>
   );
 };
 

@@ -324,3 +324,39 @@
   color: var(--red-500);
   font-size: var(--text-base);
 }
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .searchInput {
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .toolbarRight {
+    width: 100%;
+  }
+
+  .toolbar {
+    align-items: stretch;
+  }
+
+  .modal {
+    padding: 12px;
+    align-items: flex-end;
+  }
+
+  .modalCard {
+    padding: 20px 16px;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
+
+  .modalFooter {
+    flex-direction: column-reverse;
+  }
+
+  .modalFooter > * {
+    width: 100%;
+  }
+}

@@ -3,7 +3,7 @@ import { ShoppingCart, Package, TrendingUp, Users, Calendar, Filter } from 'luci
 import AdminLayout from '../../../components/templates/AdminLayout/AdminLayout'
 import SellerRanking from '../../../components/organisms/SellerRanking/SellerRanking'
 import Spinner from '../../../components/atoms/Spinner/Spinner'
-import { getStats, getSellersRanking, getOrders, getOrder, getDashboardStats, getSellerPerformance, getProductPerformance } from '../../../services/api'
+import { getStats, getSellersRanking, getOrders, getDashboardStats, getSellerPerformance, getProductPerformance } from '../../../services/api'
 import { formatCurrency } from '../../../utils/formatters'
 import type { Stats, Seller, Order } from '../../../types/index'
 import styles from './Dashboard.module.css'
@@ -49,16 +49,42 @@ export default function Dashboard() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [dashRes, perfRes, prodRes, sellersRes] = await Promise.all([
+        const [dashRes, perfRes, prodRes, sellersRes, ordersRes] = await Promise.all([
           getDashboardStats(period),
           getSellerPerformance(period),
           getProductPerformance(period),
           getSellersRanking(),
+          getOrders(),
         ])
         setDashboardStats(dashRes.data)
-        setSellerPerf(perfRes.data)
         setProductPerf(prodRes.data)
         setAllSellers(sellersRes.data)
+
+        // If sellerPerf is empty (backend not counting), fall back to counting from orders
+        if (perfRes.data.length > 0) {
+          setSellerPerf(perfRes.data)
+        } else {
+          const countMap = new Map<number, { name: string; orders: number; total: number }>()
+          for (const order of ordersRes.data) {
+            if (!order.seller_id) continue
+            const entry = countMap.get(order.seller_id) ?? {
+              name: order.seller_name ?? String(order.seller_id),
+              orders: 0,
+              total: 0,
+            }
+            entry.orders += 1
+            entry.total += Number(order.total_price) || 0
+            countMap.set(order.seller_id, entry)
+          }
+          setSellerPerf(
+            Array.from(countMap.entries()).map(([seller_id, v]) => ({
+              seller_id,
+              seller_name: v.name,
+              orders: v.orders,
+              total: v.total,
+            }))
+          )
+        }
       } catch {
         setError('Erro ao carregar dados do dashboard.')
       } finally {
@@ -89,15 +115,20 @@ export default function Dashboard() {
     [visibleSellerPerf]
   )
 
-  // Sellers for ranking: use API data + allSellers info
+  // Sellers for ranking: merge sellerPerf counts into allSellers
   const rankingSellers = useMemo((): Seller[] => {
     const map = new Map<number, number>()
     for (const sp of sellerPerf) {
       map.set(sp.seller_id, sp.orders)
     }
     return allSellers
-      .map((s) => ({ ...s, sales_count: map.get(s.id) ?? 0 }))
-      .filter((s) => s.sales_count > 0)
+      .map((s) => ({
+        ...s,
+        // Use sellerPerf count if available, otherwise fall back to the
+        // sales_count already returned by /sellers/ranking (all-time total)
+        sales_count: map.has(s.id) ? map.get(s.id)! : (s.sales_count ?? 0),
+      }))
+      .filter((s) => (s.sales_count ?? 0) > 0)
       .sort((a, b) => (b.sales_count ?? 0) - (a.sales_count ?? 0))
   }, [sellerPerf, allSellers])
 

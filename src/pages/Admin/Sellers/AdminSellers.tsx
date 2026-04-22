@@ -9,6 +9,7 @@ import TableSkeleton from '../../../components/atoms/TableSkeleton/TableSkeleton
 import ConfirmDialog from '../../../components/atoms/ConfirmDialog/ConfirmDialog'
 import {
   getSellers,
+  getOrders,
   createSeller,
   updateSeller,
   deleteSeller,
@@ -57,8 +58,18 @@ export default function AdminSellers() {
   async function fetchSellers() {
     try {
       setLoading(true)
-      const res = await getSellers()
-      setSellers(res.data)
+      const [sellersRes, ordersRes] = await Promise.all([getSellers(), getOrders()])
+      const countMap = new Map<number, number>()
+      for (const order of ordersRes.data) {
+        if (order.seller_id) {
+          countMap.set(order.seller_id, (countMap.get(order.seller_id) ?? 0) + 1)
+        }
+      }
+      const merged = sellersRes.data.map((s) => ({
+        ...s,
+        sales_count: countMap.get(s.id) ?? 0,
+      }))
+      setSellers(merged)
     } catch {
       setError('Erro ao carregar vendedores.')
     } finally {

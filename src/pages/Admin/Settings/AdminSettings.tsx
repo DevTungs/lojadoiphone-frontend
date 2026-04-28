@@ -12,12 +12,24 @@ import styles from './AdminSettings.module.css'
 
 type ImageField = 'logo_url' | 'favicon_url'
 
+function normalizeDeliveryVerificationFlag(value: unknown): 0 | 1 {
+  if (typeof value === 'boolean') return value ? 1 : 0
+  if (typeof value === 'number') return value === 1 ? 1 : 0
+
+  const normalized = String(value ?? '').trim().toLowerCase()
+  if (['1', 'true', 'yes', 'on'].includes(normalized)) return 1
+  if (['0', 'false', 'no', 'off'].includes(normalized)) return 0
+
+  return 1
+}
+
 export default function AdminSettings() {
   const [form, setForm] = useState<StoreSettings>({
     store_name: '',
     logo_url: '',
     favicon_url: '',
     whatsapp: '',
+    enable_delivery_verification: 1,
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -32,7 +44,11 @@ export default function AdminSettings() {
 
   useEffect(() => {
     getSettings()
-      .then((res) => setForm({ ...res.data, favicon_url: res.data.favicon_url ?? '' }))
+      .then((res) => setForm({
+        ...res.data,
+        favicon_url: res.data.favicon_url ?? '',
+        enable_delivery_verification: normalizeDeliveryVerificationFlag(res.data.enable_delivery_verification),
+      }))
       .catch(() => setError('Erro ao carregar configurações.'))
       .finally(() => setLoading(false))
   }, [])
@@ -129,6 +145,22 @@ export default function AdminSettings() {
                 type="tel"
               />
               <p className={styles.hint}>Com código do país (ex: +55 para Brasil, +595 para Paraguai)</p>
+            </div>
+
+            {/* Palavra de verificação */}
+            <div className={styles.field}>
+              <label className={styles.label}>Palavra de verificação na entrega</label>
+              <label className={styles.toggleRow}>
+                <input
+                  type="checkbox"
+                  checked={Boolean(form.enable_delivery_verification)}
+                  onChange={(e) => setForm({ ...form, enable_delivery_verification: e.target.checked ? 1 : 0 })}
+                />
+                <span>{form.enable_delivery_verification ? 'Habilitada' : 'Desabilitada'}</span>
+              </label>
+              <p className={styles.hint}>
+                Quando desabilitada, novos pedidos não terão palavra de verificação e ela não será exibida para clientes.
+              </p>
             </div>
 
             {/* Logo da loja */}

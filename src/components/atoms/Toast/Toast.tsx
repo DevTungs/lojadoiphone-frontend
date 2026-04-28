@@ -6,6 +6,7 @@ export interface ToastMessage {
   id: number
   type: 'success' | 'error'
   message: string
+  duration?: number
 }
 
 interface ToastProps {
@@ -25,9 +26,9 @@ export default function Toast({ toasts, onClose }: ToastProps) {
 
 function ToastItem({ toast, onClose }: { toast: ToastMessage; onClose: (id: number) => void }) {
   useEffect(() => {
-    const timer = setTimeout(() => onClose(toast.id), 3500)
+    const timer = setTimeout(() => onClose(toast.id), toast.duration ?? 6000)
     return () => clearTimeout(timer)
-  }, [toast.id, onClose])
+  }, [toast.duration, toast.id, onClose])
 
   return (
     <div className={`${styles.toast} ${styles[toast.type]}`}>

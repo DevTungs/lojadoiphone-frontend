@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { ShoppingCart, X, Plus, Minus, Trash2, LogIn } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import type { Seller } from '../../../types/index';
 import { useCart } from '../../../contexts/CartContext';
 import { useCustomerAuth } from '../../../contexts/CustomerAuthContext';
 import { formatCurrency } from '../../../utils/formatters';
 import { assetUrl } from '../../../utils/assetUrl';
 import { buildApiUrl } from '../../../services/api';
+import { useToast } from '../../../hooks/useToast';
+import Toast from '../../atoms/Toast/Toast';
 import styles from './CartDrawer.module.css';
 
 interface CartDrawerProps {
@@ -19,13 +22,14 @@ interface CartDrawerProps {
   storeWhatsapp?: string;
 }
 
-const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onFinalize, onLoginRequired, preselectedSellerId, preselectedSellerName, lockSeller, storeWhatsapp }) => {
-  const { items: cartItems, removeItem: removeFromCart, updateQuantity, clearCart, total } = useCart();
+const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onLoginRequired, preselectedSellerId, preselectedSellerName, lockSeller }) => {
+  const navigate = useNavigate();
+  const { items: cartItems, removeItem: removeFromCart, updateQuantity, total } = useCart();
   const { customer, isLoggedIn } = useCustomerAuth();
   const [sellers, setSellers] = useState<Seller[]>([]);
   const [selectedSellerId, setSelectedSellerId] = useState<string>(preselectedSellerId ?? '');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<{ seller?: string }>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { toasts, removeToast } = useToast();
 
   useEffect(() => {
     const fetchSellers = async () => {
@@ -63,41 +67,16 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onFinalize, on
   }, [isOpen]);
 
   const validate = (): boolean => {
-    const newErrors: { seller?: string } = {};
+    const newErrors: Record<string, string> = {};
     if (!selectedSellerId) {
       newErrors.seller = 'Selecione um vendedor';
     }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const buildWhatsAppMessage = (orderId: number | string): string => {
-    const itemsText = cartItems
-      .map(
-        (item) =>
-          `• ${item.product.name} (x${item.quantity}) — ${formatCurrency(item.product.price * item.quantity)}`
-      )
-      .join('\n');
-
-    const message = [
-      `Olá! Gostaria de finalizar meu pedido 🛍️`,
-      ``,
-      `*Pedido #${orderId}*`,
-      ``,
-      `*Produtos:*`,
-      itemsText,
-      ``,
-      `*Total:* ${formatCurrency(total)}`,
-      ``,
-      `*Nome:* ${customer?.name ?? 'N/A'}`,
-      `*Telefone:* ${customer?.phone ?? 'N/A'}`,
-    ].join('\n');
-
-    const phone = (storeWhatsapp ?? '').replace(/\D/g, '');
-    return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-  };
-
-  const handleFinalize = async () => {
+  const handleGoToCheckout = async () => {
     if (!isLoggedIn) {
       onLoginRequired?.();
       return;
@@ -105,43 +84,8 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onFinalize, on
 
     if (!validate()) return;
 
-    setIsSubmitting(true);
-    try {
-      const response = await fetch(buildApiUrl('/orders'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customer_id: customer?.id,
-          customer_name: customer?.name,
-          phone: customer?.phone,
-          seller_id: selectedSellerId,
-          items: cartItems.map((item) => ({
-            product_id: item.product.id,
-            quantity: item.quantity,
-            price: item.product.price,
-          })),
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Erro ao criar pedido');
-      }
-
-      const order = await response.json();
-      const whatsappUrl = buildWhatsAppMessage(order.id);
-      window.open(whatsappUrl, '_blank');
-
-      clearCart();
-      onFinalize(selectedSellerId);
-      onClose();
-
-      setSelectedSellerId('');
-    } catch (err) {
-      console.error('Erro ao finalizar pedido:', err);
-      alert('Erro ao finalizar pedido. Tente novamente.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    onClose();
+    navigate('/checkout', { state: { preselectedSellerId: selectedSellerId } });
   };
 
   return (
@@ -247,7 +191,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onFinalize, on
               <>
                 <div className={styles.customerInfo}>
                   <div className={styles.infoItem}>
-                    <span className={styles.label}>Nome:</span>
+                    <span className={styles.label}>Conta:</span>
                     <span className={styles.value}>{customer?.name}</span>
                   </div>
                   <div className={styles.infoItem}>
@@ -267,7 +211,11 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onFinalize, on
                       value={selectedSellerId}
                       onChange={(e) => {
                         setSelectedSellerId(e.target.value);
-                        setErrors((prev) => ({ ...prev, seller: undefined }));
+                        setErrors((prev) => {
+                          const next = { ...prev };
+                          delete next.seller;
+                          return next;
+                        });
                       }}
                     >
                       <option value="">Selecione um vendedor</option>
@@ -287,16 +235,17 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onFinalize, on
 
                 <button
                   className={styles.whatsappBtn}
-                  onClick={handleFinalize}
-                  disabled={isSubmitting || (!lockSeller && !selectedSellerId) || (!!lockSeller && !preselectedSellerId)}
+                  onClick={handleGoToCheckout}
+                  disabled={(!lockSeller && !selectedSellerId) || (!!lockSeller && !preselectedSellerId)}
                 >
-                  {isSubmitting ? 'Processando...' : 'Finalizar pedido no WhatsApp'}
+                  Ir para checkout
                 </button>
               </>
             )}
           </div>
         )}
       </aside>
+      <Toast toasts={toasts} onClose={removeToast} />
     </>
   );
 };

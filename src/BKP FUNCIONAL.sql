@@ -189,12 +189,13 @@ CREATE TABLE IF NOT EXISTS `store_settings` (
   `store_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT 'Loja do iPhone',
   `whatsapp` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT '',
   `favicon_url` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT '',
+  `enable_delivery_verification` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Copiando dados para a tabela loja_iphone.store_settings: ~1 rows (aproximadamente)
-INSERT IGNORE INTO `store_settings` (`id`, `logo_url`, `store_name`, `whatsapp`, `favicon_url`) VALUES
-	(1, '/uploads/1774880494880-cidpdnihxem.png', 'Loja do iPhone', '', '/uploads/1774880499870-1n9ruyr92ch.png');
+INSERT IGNORE INTO `store_settings` (`id`, `logo_url`, `store_name`, `whatsapp`, `favicon_url`, `enable_delivery_verification`) VALUES
+	(1, '/uploads/1774880494880-cidpdnihxem.png', 'Loja do iPhone', '', '/uploads/1774880499870-1n9ruyr92ch.png', 1);
 
 -- Copiando estrutura para tabela loja_iphone.users
 CREATE TABLE IF NOT EXISTS `users` (

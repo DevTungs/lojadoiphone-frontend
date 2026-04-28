@@ -20,6 +20,7 @@ import AdminCustomers from './pages/Admin/Customers/AdminCustomers'
 import AdminPromotions from './pages/Admin/Promotions/AdminPromotions'
 import Products from './pages/Products/Products'
 import SellerPage from './pages/SellerPage/SellerPage'
+import Checkout from './pages/Checkout/Checkout'
 import Register from './pages/Register/Register'
 import CustomerLogin from './pages/CustomerLogin/CustomerLogin'
 import CustomerAccount from './pages/CustomerAccount/CustomerAccount'
@@ -62,6 +63,7 @@ function AppContent() {
             <Route path="/" element={<Home />} />
             <Route path="/pedido" element={<OrderTracking />} />
             <Route path="/produtos" element={<Products />} />
+            <Route path="/checkout" element={<Checkout />} />
             <Route path="/vendedor/:slug" element={<SellerPage />} />
             <Route path="/cadastro" element={<Register />} />
             <Route path="/login" element={<CustomerLogin />} />

@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Package, LogOut, CheckCircle, Clock, AlertCircle, Home, User, Mail, Phone, Edit2, MessageCircle } from 'lucide-react'
+import { Package, LogOut, CheckCircle, Clock, AlertCircle, Home, User, Mail, Phone, Edit2, MessageCircle, QrCode, Loader2 } from 'lucide-react'
 import { useCustomerAuth } from '../../contexts/CustomerAuthContext'
 import { formatCurrency } from '../../utils/formatters'
-import { buildApiUrl } from '../../services/api'
+import { buildApiUrl, generateOrderPixPayment } from '../../services/api'
+import { useToast } from '../../hooks/useToast'
 import Button from '../../components/atoms/Button/Button'
 import Input from '../../components/atoms/Input/Input'
+import PixPaymentModal from '../../components/organisms/PixPaymentModal/PixPaymentModal'
+import Toast from '../../components/atoms/Toast/Toast'
 import styles from './CustomerAccount.module.css'
 
 interface OrderItem {
@@ -21,6 +24,7 @@ interface Order {
   created_at: string
   seller_name: string
   items: OrderItem[]
+  verification_word?: string
 }
 
 interface CustomerProfile {
@@ -33,12 +37,62 @@ interface CustomerProfile {
   created_at: string
 }
 
+interface PixModalState {
+  orderId: number
+  amount: number
+  qrCode: string
+  paymentString: string
+  externalId: string
+  expirationDate: string
+}
+
+function normalizePixPayment(raw: unknown): PixModalState | null {
+  if (!raw || typeof raw !== 'object') return null
+  const payment = raw as Record<string, unknown>
+
+  const qrCode = typeof payment.qrCode === 'string' ? payment.qrCode : typeof payment.qr_code === 'string' ? payment.qr_code : ''
+  const paymentString = typeof payment.paymentString === 'string'
+    ? payment.paymentString
+    : typeof payment.payment_string === 'string'
+      ? payment.payment_string
+      : ''
+
+  if (!qrCode || !paymentString) return null
+
+  const amountRaw = payment.amount
+  const amount = typeof amountRaw === 'number' ? amountRaw : Number(amountRaw ?? 0)
+
+  return {
+    orderId: Number(payment.order_id ?? 0),
+    amount: Number.isFinite(amount) ? amount : 0,
+    qrCode,
+    paymentString,
+    externalId: String(payment.externalId ?? payment.external_id ?? ''),
+    expirationDate: String(payment.expirationDate ?? payment.expires_at ?? new Date().toISOString()),
+  }
+}
+
+function isAwaitingPayment(status: number): boolean {
+  return status === 1 || status === 2
+}
+
+function isDeliveryVerificationEnabled(value: unknown): boolean {
+  if (typeof value === 'boolean') return value
+  if (typeof value === 'number') return value === 1
+
+  const normalized = String(value ?? '').trim().toLowerCase()
+  if (['1', 'true', 'yes', 'on'].includes(normalized)) return true
+  if (['0', 'false', 'no', 'off'].includes(normalized)) return false
+
+  return true
+}
+
 const STATUS_LABELS: Record<number, string> = {
-  0: 'Pedido realizado',
-  1: 'Aguardando pagamento',
-  2: 'Pagamento confirmado',
-  3: 'Em separação',
-  4: 'Aguardando coleta',
+  0: 'Cancelado',
+  1: 'Pedido Realizado',
+  2: 'Aguardando recibo PIX',
+  3: 'Pagamento Confirmado',
+  4: 'Aguardando Coleta',
   5: 'Finalizado',
 }
 
@@ -59,7 +113,7 @@ function formatDate(str: string) {
 }
 
 export default function CustomerAccount() {
-  const { token, isLoggedIn, logout } = useCustomerAuth()
+  const { token, isLoggedIn, isLoading, logout } = useCustomerAuth()
   const navigate = useNavigate()
   const [customer, setCustomer] = useState<CustomerProfile | null>(null)
   const [orders, setOrders] = useState<Order[]>([])
@@ -68,8 +122,16 @@ export default function CustomerAccount() {
   const [editMode, setEditMode] = useState(false)
   const [editData, setEditData] = useState({ name: '', email: '', phone: '' })
   const [whatsapp, setWhatsapp] = useState('')
+  const [deliveryVerificationEnabled, setDeliveryVerificationEnabled] = useState(true)
+  const [pixLoadingOrderId, setPixLoadingOrderId] = useState<number | null>(null)
+  const [pixModalData, setPixModalData] = useState<PixModalState | null>(null)
+  const { toasts, addToast, removeToast } = useToast()
 
   useEffect(() => {
+    if (isLoading) {
+      return
+    }
+
     if (!isLoggedIn) {
       navigate('/login')
       return
@@ -90,13 +152,14 @@ export default function CustomerAccount() {
         setOrders(ordersData || [])
         const whatsappNumber = settingsData?.whatsapp || ''
         setWhatsapp(whatsappNumber)
+        setDeliveryVerificationEnabled(isDeliveryVerificationEnabled(settingsData?.enable_delivery_verification))
         console.log('Settings carregadas:', { whatsapp: whatsappNumber, settings: settingsData })
       })
       .catch(() => {
         setOrders([])
       })
       .finally(() => setLoading(false))
-  }, [isLoggedIn, token, navigate])
+  }, [isLoading, isLoggedIn, token, navigate])
 
   function handleLogout() {
     logout()
@@ -114,7 +177,7 @@ export default function CustomerAccount() {
     if (!whatsapp) return
     const phone = whatsapp.replace(/\D/g, '')
     const message = [
-      `Olá! Gostaria de efetuar o pagamento do meu pedido.`,
+      `Olá! Acabei de realizar o pagamento via PIX e vou enviar o comprovante do meu pedido.`,
       ``,
       `*Pedido #${order.id}*`,
       `*Valor total:* ${formatCurrency(order.total_price)}`,
@@ -125,6 +188,24 @@ export default function CustomerAccount() {
     ].join('\n')
 
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank')
+  }
+
+  async function handlePixPayment(order: Order) {
+    setPixLoadingOrderId(order.id)
+    try {
+      const res = await generateOrderPixPayment(order.id)
+      const parsed = normalizePixPayment(res.data.payment)
+      if (!parsed) {
+        addToast('error', 'Não foi possível montar o QR Code PIX para este pedido.', 7000)
+        return
+      }
+      setPixModalData({ ...parsed, orderId: order.id, amount: parsed.amount || order.total_price })
+    } catch (error) {
+      console.error('[CustomerAccount] Falha ao gerar PIX', error)
+      addToast('error', 'Não foi possível gerar a cobrança PIX agora. Tente novamente em instantes.', 7000)
+    } finally {
+      setPixLoadingOrderId(null)
+    }
   }
 
   return (
@@ -220,7 +301,7 @@ export default function CustomerAccount() {
                   </div>
                   <div className={styles.formActions}>
                     <Button variant="secondary" onClick={toggleEditMode}>Cancelar</Button>
-                    <Button onClick={() => { alert('Edição de perfil em desenvolvimento'); toggleEditMode() }}>
+                    <Button onClick={() => { addToast('error', 'Edição de perfil em desenvolvimento.', 7000); toggleEditMode() }}>
                       Salvar alterações
                     </Button>
                   </div>
@@ -276,15 +357,37 @@ export default function CustomerAccount() {
                             )}
                             <span className={styles.totalLine}>Total: <strong>{formatCurrency(order.total_price)}</strong></span>
                           </div>
+                          {deliveryVerificationEnabled && order.verification_word && (
+                            <div className={styles.verificationBox}>
+                              <p className={styles.verificationBoxLabel}>Palavra de verificação na entrega</p>
+                              <p className={styles.verificationBoxWord}>{order.verification_word}</p>
+                              <p className={styles.verificationBoxHint}>Apresente esta palavra ao vendedor no momento da entrega.</p>
+                            </div>
+                          )}
                           {whatsapp && (
-                            <button
-                              className={styles.contactFinanceBtn}
-                              onClick={() => handleContactFinance(order)}
-                              title="Entrar em contato para efetuar o pagamento"
-                            >
-                              <MessageCircle size={14} />
-                              Pagar via WhatsApp
-                            </button>
+                            <div className={styles.paymentActions}>
+                              {isAwaitingPayment(order.status) && (
+                                <button
+                                  className={styles.pixPayBtn}
+                                  onClick={() => handlePixPayment(order)}
+                                  title="Gerar ou reabrir cobrança PIX"
+                                  disabled={pixLoadingOrderId === order.id}
+                                >
+                                  {pixLoadingOrderId === order.id ? <Loader2 size={14} className={styles.spinIcon} /> : <QrCode size={14} />}
+                                  {pixLoadingOrderId === order.id ? 'Gerando PIX...' : order.status === 2 ? 'Ver PIX novamente' : 'Pagar via PIX'}
+                                </button>
+                              )}
+                              {order.status === 2 && (
+                                <button
+                                  className={styles.contactFinanceBtn}
+                                  onClick={() => handleContactFinance(order)}
+                                  title="Enviar comprovante pelo WhatsApp"
+                                >
+                                  <MessageCircle size={14} />
+                                  Enviar comprovante pelo WhatsApp
+                                </button>
+                              )}
+                            </div>
                           )}
                         </div>
                       </div>
@@ -296,6 +399,24 @@ export default function CustomerAccount() {
           </>
         )}
       </div>
+      {pixModalData && (
+        <PixPaymentModal
+          isOpen={Boolean(pixModalData)}
+          orderId={pixModalData.orderId}
+          amount={pixModalData.amount}
+          qrCode={pixModalData.qrCode}
+          paymentString={pixModalData.paymentString}
+          externalId={pixModalData.externalId}
+          expirationDate={pixModalData.expirationDate}
+          onClose={() => setPixModalData(null)}
+          onCancel={() => {
+            setPixModalData(null)
+          }}
+          cancelLabel="Fechar por agora"
+          closeLabel="Continuar vendo o PIX"
+        />
+      )}
+      <Toast toasts={toasts} onClose={removeToast} />
     </div>
   )
 }

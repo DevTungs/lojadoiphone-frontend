@@ -41,6 +41,17 @@ export interface Order {
   status: number;
   total_price: number;
   created_at: string;
+  delivery_full_name?: string;
+  delivery_zip_code?: string;
+  delivery_street?: string;
+  delivery_number?: string;
+  delivery_neighborhood?: string;
+  delivery_city?: string;
+  delivery_state?: string;
+  delivery_complement?: string;
+  delivery_reference?: string;
+  verification_word?: string;
+  checkout_phone?: string;
   items?: OrderItem[];
 }
 
@@ -54,6 +65,7 @@ export interface StoreSettings {
   favicon_url: string;
   store_name: string;
   whatsapp: string;
+  enable_delivery_verification: number;
 }
 
 export interface Stats {

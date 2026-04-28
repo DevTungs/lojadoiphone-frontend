@@ -57,10 +57,10 @@ export function formatDate(date: string): string {
 export function getOrderStatusLabel(status: number): string {
   const labels: Record<number, string> = {
     0: 'Cancelado',
-    1: 'Pedido realizado',
-    2: 'Aguardando pagamento',
-    3: 'Pagamento confirmado',
-    4: 'Pedido em separação',
+    1: 'Pedido Realizado',
+    2: 'Aguardando Recibo PIX',
+    3: 'Pagamento Confirmado',
+    4: 'Aguardando Coleta',
     5: 'Finalizado',
   };
   return labels[status] ?? 'Desconhecido';
@@ -74,7 +74,7 @@ export function getOrderStatusColor(status: number): string {
   const colors: Record<number, string> = {
     0: 'var(--red-500)',     // Cancelado
     1: 'var(--blue-500)',    // Pedido realizado
-    2: 'var(--yellow-500)',  // Aguardando pagamento
+    2: 'var(--yellow-500)',  // Aguardando recibo PIX
     3: 'var(--mint)',        // Pagamento confirmado
     4: 'var(--mint)',        // Pedido em separação
     5: 'var(--green-500)',   // Finalizado

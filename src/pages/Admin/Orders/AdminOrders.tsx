@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
-import { X, Eye, History, Search, MessageCircle } from 'lucide-react'
+import { X, Eye, History, Search, MessageCircle, QrCode, Loader2 } from 'lucide-react'
 import AdminLayout from '../../../components/templates/AdminLayout/AdminLayout'
 import Button from '../../../components/atoms/Button/Button'
 import Spinner from '../../../components/atoms/Spinner/Spinner'
 import TableSkeleton from '../../../components/atoms/TableSkeleton/TableSkeleton'
 import Toast from '../../../components/atoms/Toast/Toast'
 import { useToast } from '../../../hooks/useToast'
-import { getOrders, getOrder, updateOrderStatus } from '../../../services/api'
+import { getOrders, getOrder, updateOrderStatus, generateOrderPixPayment, getSettings } from '../../../services/api'
+import PixPaymentModal from '../../../components/organisms/PixPaymentModal/PixPaymentModal'
 import {
   formatCurrency,
   formatDate,
@@ -22,9 +23,59 @@ interface StatusHistoryEntry {
   admin_name: string
   created_at: string
 }
+
+interface PixModalState {
+  orderId: number
+  amount: number
+  qrCode: string
+  paymentString: string
+  externalId: string
+  expirationDate: string
+}
+
+function normalizePixPayment(raw: unknown): PixModalState | null {
+  if (!raw || typeof raw !== 'object') return null
+  const payment = raw as Record<string, unknown>
+
+  const qrCode = typeof payment.qrCode === 'string' ? payment.qrCode : typeof payment.qr_code === 'string' ? payment.qr_code : ''
+  const paymentString = typeof payment.paymentString === 'string'
+    ? payment.paymentString
+    : typeof payment.payment_string === 'string'
+      ? payment.payment_string
+      : ''
+
+  if (!qrCode || !paymentString) return null
+
+  const amountRaw = payment.amount
+  const amount = typeof amountRaw === 'number' ? amountRaw : Number(amountRaw ?? 0)
+
+  return {
+    orderId: Number(payment.order_id ?? 0),
+    amount: Number.isFinite(amount) ? amount : 0,
+    qrCode,
+    paymentString,
+    externalId: String(payment.externalId ?? payment.external_id ?? ''),
+    expirationDate: String(payment.expirationDate ?? payment.expires_at ?? new Date().toISOString()),
+  }
+}
+
+function isAwaitingPayment(status: number): boolean {
+  return status === 1 || status === 2
+}
 import styles from './AdminOrders.module.css'
 
 const STATUS_OPTIONS = [0, 1, 2, 3, 4, 5] as const
+
+function isDeliveryVerificationEnabled(value: unknown): boolean {
+  if (typeof value === 'boolean') return value
+  if (typeof value === 'number') return value === 1
+
+  const normalized = String(value ?? '').trim().toLowerCase()
+  if (['1', 'true', 'yes', 'on'].includes(normalized)) return true
+  if (['0', 'false', 'no', 'off'].includes(normalized)) return false
+
+  return true
+}
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState<Order[]>([])
@@ -39,6 +90,9 @@ export default function AdminOrders() {
   const [newStatus, setNewStatus] = useState<number>(0)
   const [saving, setSaving] = useState(false)
   const [inlineSaving, setInlineSaving] = useState<number | null>(null)
+  const [pixLoadingOrderId, setPixLoadingOrderId] = useState<number | null>(null)
+  const [pixModalData, setPixModalData] = useState<PixModalState | null>(null)
+  const [deliveryVerificationEnabled, setDeliveryVerificationEnabled] = useState(true)
   const { toasts, addToast, removeToast } = useToast()
 
   const filtered = useMemo(() => {
@@ -68,8 +122,9 @@ export default function AdminOrders() {
   useEffect(() => {
     async function fetchOrders() {
       try {
-        const res = await getOrders()
-        setOrders(res.data)
+        const [ordersRes, settingsRes] = await Promise.all([getOrders(), getSettings()])
+        setOrders(ordersRes.data)
+        setDeliveryVerificationEnabled(isDeliveryVerificationEnabled(settingsRes.data.enable_delivery_verification))
       } catch {
         setError('Erro ao carregar pedidos.')
       } finally {
@@ -138,10 +193,28 @@ export default function AdminOrders() {
     window.open(`https://wa.me/${phone}?text=${text}`, '_blank')
   }
 
+  async function openPixPayment(order: Order) {
+    setPixLoadingOrderId(order.id)
+    try {
+      const res = await generateOrderPixPayment(order.id)
+      const parsed = normalizePixPayment(res.data.payment)
+      if (!parsed) {
+        addToast('error', 'Não foi possível montar o QR Code PIX deste pedido.')
+        return
+      }
+      setPixModalData({ ...parsed, orderId: order.id, amount: parsed.amount || order.total_price })
+      addToast('success', res.data.reused ? 'Cobrança PIX ativa encontrada.' : 'Cobrança PIX gerada com sucesso!')
+    } catch {
+      addToast('error', 'Falha ao gerar cobrança PIX para o pedido.')
+    } finally {
+      setPixLoadingOrderId(null)
+    }
+  }
+
   const hasFilters = !!(dateFrom || dateTo || search || statusFilter !== null)
 
   return (
-    <AdminLayout title="Pedidos">
+    <AdminLayout title="Pididys">
       {/* ─── Contadores por status ─── */}
       <div className={styles.statusCounters}>
         <button
@@ -273,6 +346,16 @@ export default function AdminOrders() {
                       >
                         <MessageCircle size={15} />
                       </button>
+                      {isAwaitingPayment(order.status) && (
+                        <button
+                          className={`${styles.iconBtn} ${styles.pixBtn}`}
+                          onClick={() => openPixPayment(order)}
+                          title="Gerar ou regerar PIX"
+                          disabled={pixLoadingOrderId === order.id}
+                        >
+                          {pixLoadingOrderId === order.id ? <Loader2 size={15} className={styles.spinIcon} /> : <QrCode size={15} />}
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -300,6 +383,19 @@ export default function AdminOrders() {
                 {selectedOrder ? `Pedido #${selectedOrder.id}` : 'Carregando...'}
               </h2>
               <div className={styles.modalHeaderActions}>
+                {selectedOrder && (
+                  isAwaitingPayment(selectedOrder.status) && (
+                    <button
+                      className={styles.pixModalBtn}
+                      onClick={() => openPixPayment(selectedOrder)}
+                      title="Gerar ou regerar PIX"
+                      disabled={pixLoadingOrderId === selectedOrder.id}
+                    >
+                      {pixLoadingOrderId === selectedOrder.id ? <Loader2 size={16} className={styles.spinIcon} /> : <QrCode size={16} />}
+                      {pixLoadingOrderId === selectedOrder.id ? 'Gerando PIX...' : 'Cobrança PIX'}
+                    </button>
+                  )
+                )}
                 {selectedOrder && (
                   <button
                     className={styles.whatsappModalBtn}
@@ -353,7 +449,47 @@ export default function AdminOrders() {
                       {getOrderStatusLabel(selectedOrder.status)}
                     </span>
                   </div>
+                  {selectedOrder.delivery_full_name && (
+                    <div className={styles.detailItem}>
+                      <span className={styles.detailLabel}>Nome entrega</span>
+                      <span className={styles.detailValue}>{selectedOrder.delivery_full_name}</span>
+                    </div>
+                  )}
+                  {(selectedOrder.delivery_city || selectedOrder.delivery_state) && (
+                    <div className={styles.detailItem}>
+                      <span className={styles.detailLabel}>Cidade / Estado</span>
+                      <span className={styles.detailValue}>
+                        {[selectedOrder.delivery_city, selectedOrder.delivery_state].filter(Boolean).join(' / ')}
+                      </span>
+                    </div>
+                  )}
+                  {selectedOrder.delivery_reference && (
+                    <div className={styles.detailItem}>
+                      <span className={styles.detailLabel}>Referência</span>
+                      <span className={styles.detailValue}>{selectedOrder.delivery_reference}</span>
+                    </div>
+                  )}
                 </div>
+
+                {(selectedOrder.checkout_phone || (deliveryVerificationEnabled && selectedOrder.verification_word)) && (
+                  <div className={styles.verificationSection}>
+                    <h3 className={styles.sectionTitle}>Verificação na Entrega</h3>
+                    <div className={styles.verificationGrid}>
+                      {selectedOrder.checkout_phone && (
+                        <div className={styles.verificationItem}>
+                          <span className={styles.verificationLabel}>Telefone (checkout)</span>
+                          <span className={styles.verificationValue}>{selectedOrder.checkout_phone}</span>
+                        </div>
+                      )}
+                      {deliveryVerificationEnabled && selectedOrder.verification_word && (
+                        <div className={styles.verificationItem}>
+                          <span className={styles.verificationLabel}>Palavra de verificação</span>
+                          <span className={styles.verificationWord}>{selectedOrder.verification_word}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {selectedOrder.items && selectedOrder.items.length > 0 && (
                   <div className={styles.itemsSection}>
@@ -424,6 +560,23 @@ export default function AdminOrders() {
             ) : null}
           </div>
         </div>
+      )}
+      {pixModalData && (
+        <PixPaymentModal
+          isOpen={Boolean(pixModalData)}
+          orderId={pixModalData.orderId}
+          amount={pixModalData.amount}
+          qrCode={pixModalData.qrCode}
+          paymentString={pixModalData.paymentString}
+          externalId={pixModalData.externalId}
+          expirationDate={pixModalData.expirationDate}
+          onClose={() => setPixModalData(null)}
+          onCancel={() => {
+            const activeOrder = selectedOrder ?? orders.find((o) => o.id === pixModalData.orderId) ?? null
+            setPixModalData(null)
+            if (activeOrder) openWhatsApp(activeOrder)
+          }}
+        />
       )}
       <Toast toasts={toasts} onClose={removeToast} />
     </AdminLayout>

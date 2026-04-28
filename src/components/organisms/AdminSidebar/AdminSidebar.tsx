@@ -23,7 +23,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: 'Dashboard', path: '/admin', icon: <BarChart2 size={18} /> },
   { label: 'Produtos', path: '/admin/produtos', icon: <Package size={18} /> },
-  { label: 'Pedidos', path: '/admin/pedidos', icon: <ShoppingCart size={18} /> },
+  { label: 'Pididys', path: '/admin/pedidos', icon: <ShoppingCart size={18} /> },
   { label: 'Vendedores', path: '/admin/vendedores', icon: <Users size={18} /> },
   { label: 'Clientes', path: '/admin/clientes', icon: <UserCircle size={18} /> },
   { label: 'Promoções', path: '/admin/promocoes', icon: <Tag size={18} /> },

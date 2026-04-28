@@ -251,6 +251,38 @@
   border-top: 1px solid var(--gray-100);
 }
 
+.verificationBox {
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #e6faf5 0%, #f9f9f9 100%);
+  border: 1.5px solid var(--mint, #2dd4bf);
+  border-radius: 10px;
+  text-align: center;
+}
+
+.verificationBoxLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-500, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 6px;
+}
+
+.verificationBoxWord {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--mint-dark, #0d9488);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0 0 6px;
+}
+
+.verificationBoxHint {
+  font-size: 12px;
+  color: var(--gray-400, #9ca3af);
+  margin: 0;
+}
+
 .orderFooterTop {
   display: flex;
   justify-content: space-between;
@@ -444,4 +476,41 @@
 
 .contactFinanceBtn:active {
   transform: translateY(0);
+}
+
+.paymentActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pixPayBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  color: #ffffff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+  width: 100%;
+}
+
+.pixPayBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.pixPayBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.spinIcon {
+  animation: spin 1s linear infinite;
 }

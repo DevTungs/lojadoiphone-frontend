@@ -12,6 +12,7 @@ interface CustomerAuthContextValue {
   customer: CustomerUser | null;
   token: string | null;
   isLoggedIn: boolean;
+  isLoading: boolean;
   login: (phone: string, password: string) => Promise<void>;
   logout: () => void;
 }
@@ -24,6 +25,7 @@ const CustomerAuthContext = createContext<CustomerAuthContextValue | undefined>(
 export function CustomerAuthProvider({ children }: { children: React.ReactNode }) {
   const [customer, setCustomer] = useState<CustomerUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     try {
@@ -36,6 +38,8 @@ export function CustomerAuthProvider({ children }: { children: React.ReactNode }
     } catch {
       localStorage.removeItem(CUSTOMER_TOKEN_KEY);
       localStorage.removeItem(CUSTOMER_USER_KEY);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -73,7 +77,7 @@ export function CustomerAuthProvider({ children }: { children: React.ReactNode }
   }, []);
 
   return (
-    <CustomerAuthContext.Provider value={{ customer, token, isLoggedIn: !!customer && !!token, login, logout }}>
+    <CustomerAuthContext.Provider value={{ customer, token, isLoggedIn: !!customer && !!token, isLoading, login, logout }}>
       {children}
     </CustomerAuthContext.Provider>
   );

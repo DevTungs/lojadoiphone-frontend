@@ -78,6 +78,21 @@
   margin: 0;
 }
 
+.toggleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--gray-700);
+  font-size: var(--text-sm);
+  width: fit-content;
+}
+
+.toggleRow input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--mint);
+}
+
 .logoPreview {
   display: flex;
   flex-direction: column;

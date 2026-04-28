@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { CheckCircle, Clock, AlertCircle, Loader2, ChevronRight, ArrowLeft } from 'lucide-react';
+import { CheckCircle, Clock, AlertCircle, Loader2, ChevronRight, ArrowLeft, QrCode, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import type { Order, StoreSettings } from '../../types/index';
-import { trackOrder, getMyOrders, getSettings } from '../../services/api';
+import { trackOrder, getMyOrders, getSettings, generateOrderPixPayment } from '../../services/api';
 import { useCustomerAuth } from '../../contexts/CustomerAuthContext';
+import { useToast } from '../../hooks/useToast';
 import { formatCurrency } from '../../utils/formatters';
+import Toast from '../../components/atoms/Toast/Toast';
 import MainLayout from '../../components/templates/MainLayout/MainLayout';
 import CartDrawer from '../../components/organisms/CartDrawer/CartDrawer';
+import PixPaymentModal from '../../components/organisms/PixPaymentModal/PixPaymentModal';
 
 import styles from './OrderTracking.module.css';
 
@@ -17,10 +20,10 @@ interface TimelineStep {
 }
 
 const TIMELINE_STEPS: TimelineStep[] = [
-  { label: 'Pedido realizado', statusThreshold: 0 },
-  { label: 'Aguardando pagamento', statusThreshold: 1 },
-  { label: 'Pagamento confirmado', statusThreshold: 2 },
-  { label: 'Pedido em separação', statusThreshold: 3 },
+  { label: 'Cancelado', statusThreshold: 0 },
+  { label: 'Pedido Realizado', statusThreshold: 1 },
+  { label: 'Aguardando recibo PIX', statusThreshold: 2 },
+  { label: 'Pagamento Confirmado', statusThreshold: 3 },
   { label: 'Aguardando coleta', statusThreshold: 4 },
   { label: 'Pedido finalizado', statusThreshold: 5 },
 ];
@@ -36,17 +39,68 @@ function getStepState(stepIndex: number, orderStatus: number): StepState {
 const STATUS_LABELS: Record<number, string> = {
   0: 'Cancelado',
   1: 'Aguardando pagamento',
-  2: 'Pagamento confirmado',
+  2: 'Aguardando recibo PIX',
   3: 'Em separação',
   4: 'Aguardando coleta',
   5: 'Finalizado',
 };
+
+interface PixModalState {
+  orderId: number;
+  amount: number;
+  qrCode: string;
+  paymentString: string;
+  externalId: string;
+  expirationDate: string;
+}
+
+function normalizePixPayment(raw: unknown): PixModalState | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const payment = raw as Record<string, unknown>;
+
+  const qrCode = typeof payment.qrCode === 'string' ? payment.qrCode : typeof payment.qr_code === 'string' ? payment.qr_code : '';
+  const paymentString = typeof payment.paymentString === 'string'
+    ? payment.paymentString
+    : typeof payment.payment_string === 'string'
+      ? payment.payment_string
+      : '';
+
+  if (!qrCode || !paymentString) return null;
+
+  const amountRaw = payment.amount;
+  const amount = typeof amountRaw === 'number' ? amountRaw : Number(amountRaw ?? 0);
+
+  return {
+    orderId: Number(payment.order_id ?? 0),
+    amount: Number.isFinite(amount) ? amount : 0,
+    qrCode,
+    paymentString,
+    externalId: String(payment.externalId ?? payment.external_id ?? ''),
+    expirationDate: String(payment.expirationDate ?? payment.expires_at ?? new Date().toISOString()),
+  };
+}
+
+function isAwaitingPayment(status: number): boolean {
+  return status === 1 || status === 2;
+}
+
+function isDeliveryVerificationEnabled(value: unknown): boolean {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'number') return value === 1;
+
+  const normalized = String(value ?? '').trim().toLowerCase();
+  if (['1', 'true', 'yes', 'on'].includes(normalized)) return true;
+  if (['0', 'false', 'no', 'off'].includes(normalized)) return false;
+
+  return true;
+}
 
 const OrderTracking: React.FC = () => {
   const navigate = useNavigate();
   const { customer, isLoggedIn } = useCustomerAuth();
 
   const [settings, setSettings] = useState<StoreSettings | null>(null);
+  const [deliveryVerificationEnabled, setDeliveryVerificationEnabled] = useState(true);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Manual form state
@@ -63,9 +117,17 @@ const OrderTracking: React.FC = () => {
   const [selectedOrderFull, setSelectedOrderFull] = useState<Order | null>(null);
   const [selectedOrderLoading, setSelectedOrderLoading] = useState(false);
   const [selectedOrderError, setSelectedOrderError] = useState<string | null>(null);
+  const [pixLoadingOrderId, setPixLoadingOrderId] = useState<number | null>(null);
+  const [pixModalData, setPixModalData] = useState<PixModalState | null>(null);
+  const { toasts, addToast, removeToast } = useToast();
 
   useEffect(() => {
-    getSettings().then((r) => setSettings(r.data)).catch(() => null);
+    getSettings()
+      .then((r) => {
+        setSettings(r.data);
+        setDeliveryVerificationEnabled(isDeliveryVerificationEnabled(r.data?.enable_delivery_verification));
+      })
+      .catch(() => null);
   }, []);
 
   useEffect(() => {
@@ -123,6 +185,41 @@ const OrderTracking: React.FC = () => {
     } catch {
       return dateStr;
     }
+  };
+
+  const handlePixPayment = async (order: Order) => {
+    setPixLoadingOrderId(order.id);
+    try {
+      const res = await generateOrderPixPayment(order.id);
+      const parsed = normalizePixPayment(res.data.payment);
+      if (!parsed) {
+        addToast('error', 'Não foi possível montar o QR Code PIX para este pedido.', 7000);
+        return;
+      }
+      setPixModalData({ ...parsed, orderId: order.id, amount: parsed.amount || order.total_price });
+    } catch (error) {
+      console.error('[OrderTracking] Falha ao gerar PIX', error);
+      addToast('error', 'Não foi possível gerar a cobrança PIX agora. Tente novamente em instantes.', 7000);
+    } finally {
+      setPixLoadingOrderId(null);
+    }
+  };
+
+  const openWhatsAppForOrder = (order: Order) => {
+    const storePhone = (settings?.whatsapp ?? '').replace(/\D/g, '');
+    if (!storePhone) return;
+    const message = [
+      'Olá! Acabei de realizar o pagamento via PIX e vou enviar o comprovante do meu pedido.',
+      '',
+      `*Pedido #${order.id}*`,
+      `*Valor total:* ${formatCurrency(order.total_price)}`,
+      `*Data do pedido:* ${new Intl.DateTimeFormat('pt-BR').format(new Date(order.created_at))}`,
+      '',
+      `Meu nome: ${customer?.name ?? 'Cliente'}`,
+      `Meu telefone: ${customer?.phone ?? 'Não informado'}`,
+    ].join('\n');
+
+    window.open(`https://wa.me/${storePhone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const renderTimeline = (order: Order) => (
@@ -195,6 +292,40 @@ const OrderTracking: React.FC = () => {
               <span className={styles.metaValue}>#{order.id}</span>
             </div>
           </div>
+
+          {deliveryVerificationEnabled && (order as Order & { verification_word?: string }).verification_word && (
+            <div className={styles.verificationBox}>
+              <p className={styles.verificationBoxLabel}>Palavra de verificação na entrega</p>
+              <p className={styles.verificationBoxWord}>
+                {(order as Order & { verification_word?: string }).verification_word}
+              </p>
+              <p className={styles.verificationBoxHint}>Apresente esta palavra ao vendedor no momento da entrega.</p>
+            </div>
+          )}
+
+          {isAwaitingPayment(order.status) && (
+            <div className={styles.paymentActions}>
+              <button
+                type="button"
+                className={styles.pixPayBtn}
+                onClick={() => handlePixPayment(order)}
+                disabled={pixLoadingOrderId === order.id}
+              >
+                {pixLoadingOrderId === order.id ? <Loader2 size={14} className={styles.spinner} /> : <QrCode size={14} />}
+                {pixLoadingOrderId === order.id ? 'Gerando PIX...' : order.status === 2 ? 'Ver PIX novamente' : 'Pagar via PIX'}
+              </button>
+              {settings?.whatsapp && order.status === 2 && (
+                <button
+                  type="button"
+                  className={styles.whatsappPayBtn}
+                  onClick={() => openWhatsAppForOrder(order)}
+                >
+                  <MessageCircle size={14} />
+                  Enviar comprovante pelo WhatsApp
+                </button>
+              )}
+            </div>
+          )}
         </div>
       )}
     </>
@@ -342,6 +473,25 @@ const OrderTracking: React.FC = () => {
       </div>
 
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} onFinalize={() => setIsCartOpen(false)} onLoginRequired={() => navigate('/login')} />
+
+      {pixModalData && (
+        <PixPaymentModal
+          isOpen={Boolean(pixModalData)}
+          orderId={pixModalData.orderId}
+          amount={pixModalData.amount}
+          qrCode={pixModalData.qrCode}
+          paymentString={pixModalData.paymentString}
+          externalId={pixModalData.externalId}
+          expirationDate={pixModalData.expirationDate}
+          onClose={() => setPixModalData(null)}
+          onCancel={() => {
+            setPixModalData(null);
+          }}
+          cancelLabel="Fechar por agora"
+          closeLabel="Continuar vendo o PIX"
+        />
+      )}
+      <Toast toasts={toasts} onClose={removeToast} />
     </MainLayout>
   );
 };

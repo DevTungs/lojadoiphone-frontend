@@ -83,6 +83,23 @@ export interface CreateOrderPayload {
   items: OrderItem[];
 }
 
+export interface PixPayment {
+  provider?: string;
+  status?: string;
+  qrCodeId?: string;
+  externalId?: string;
+  paymentString?: string;
+  qrCode?: string;
+  amount?: number;
+  expirationDate?: string;
+}
+
+export interface PixPaymentResponse {
+  success: boolean;
+  payment: PixPayment;
+  reused?: boolean;
+}
+
 export const createOrder = (
   data: CreateOrderPayload
 ): Promise<{ data: Order }> => api.post('/orders', data);
@@ -106,6 +123,14 @@ export const updateOrderStatus = (
   id: number,
   status: number
 ): Promise<{ data: Order }> => api.patch(`/orders/${id}/status`, { status });
+
+export const generateOrderPixPayment = (
+  id: number
+): Promise<{ data: PixPaymentResponse }> => api.post(`/orders/${id}/payment/pix`);
+
+export const getOrderPayment = (
+  id: number
+): Promise<{ data: PixPayment }> => api.get(`/orders/${id}/payment`);
 
 // ─── Sellers ─────────────────────────────────────────────────────────────────
 

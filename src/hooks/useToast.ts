@@ -6,9 +6,9 @@ let nextId = 1
 export function useToast() {
   const [toasts, setToasts] = useState<ToastMessage[]>([])
 
-  const addToast = useCallback((type: 'success' | 'error', message: string) => {
+  const addToast = useCallback((type: 'success' | 'error', message: string, duration?: number) => {
     const id = nextId++
-    setToasts((prev) => [...prev, { id, type, message }])
+    setToasts((prev) => [...prev, { id, type, message, duration }])
   }, [])
 
   const removeToast = useCallback((id: number) => {

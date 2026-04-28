@@ -214,7 +214,7 @@ export default function AdminOrders() {
   const hasFilters = !!(dateFrom || dateTo || search || statusFilter !== null)
 
   return (
-    <AdminLayout title="Pididys">
+    <AdminLayout title="Pedidos">
       {/* ─── Contadores por status ─── */}
       <div className={styles.statusCounters}>
         <button

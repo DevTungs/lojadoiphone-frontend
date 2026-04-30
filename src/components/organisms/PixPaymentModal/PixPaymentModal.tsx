@@ -33,6 +33,8 @@ const PixPaymentModal: React.FC<PixPaymentModalProps> = ({
   const [copied, setCopied] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<string>('');
 
+  const qrCodeSrc = qrCode.startsWith('data:image') ? qrCode : `data:image/png;base64,${qrCode}`;
+
   useEffect(() => {
     if (!isOpen) return;
 
@@ -100,7 +102,7 @@ const PixPaymentModal: React.FC<PixPaymentModalProps> = ({
           <div className={styles.qrContainer}>
             {qrCode && (
               <img
-                src={`data:image/png;base64,${qrCode}`}
+                src={qrCodeSrc}
                 alt="QR Code PIX"
                 className={styles.qrCode}
               />

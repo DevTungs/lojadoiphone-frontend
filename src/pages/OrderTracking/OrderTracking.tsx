@@ -121,6 +121,25 @@ const OrderTracking: React.FC = () => {
   const [pixModalData, setPixModalData] = useState<PixModalState | null>(null);
   const { toasts, addToast, removeToast } = useToast();
 
+  const loadMyOrders = async (): Promise<Order[]> => {
+    if (!customer?.phone) return [];
+    const response = await getMyOrders(customer.phone);
+    const orders = response.data || [];
+    setMyOrders(orders);
+    return orders;
+  };
+
+  const reloadSelectedOrder = async (currentOrderId?: number) => {
+    const activeOrderId = currentOrderId ?? selectedOrderFull?.id ?? selectedOrder?.id;
+    if (!activeOrderId) return;
+
+    const activePhone = customer?.phone ?? phone.trim();
+    if (!activePhone) return;
+
+    const response = await trackOrder(activeOrderId, activePhone);
+    setSelectedOrderFull(response.data);
+  };
+
   useEffect(() => {
     getSettings()
       .then((r) => {
@@ -133,8 +152,8 @@ const OrderTracking: React.FC = () => {
   useEffect(() => {
     if (isLoggedIn && customer?.phone) {
       setMyOrdersLoading(true);
-      getMyOrders(customer.phone)
-        .then((r) => setMyOrders(r.data))
+      loadMyOrders()
+        .then(() => undefined)
         .catch(() => setMyOrders([]))
         .finally(() => setMyOrdersLoading(false));
     }
@@ -486,6 +505,24 @@ const OrderTracking: React.FC = () => {
           onClose={() => setPixModalData(null)}
           onCancel={() => {
             setPixModalData(null);
+          }}
+          onExpired={() => {
+            const expiredOrderId = pixModalData.orderId;
+            setPixModalData(null);
+
+            if (isLoggedIn && customer?.phone) {
+              void loadMyOrders()
+                .then((orders) => {
+                  const updatedOrder = orders.find((order) => order.id === expiredOrderId) || null;
+                  setSelectedOrder(updatedOrder);
+                  return reloadSelectedOrder(expiredOrderId);
+                })
+                .catch(() => null);
+            } else if (orderId.trim() && phone.trim()) {
+              void reloadSelectedOrder(expiredOrderId).catch(() => null);
+            }
+
+            addToast('error', 'O QR Code PIX expirou. O pedido foi cancelado.', 7000);
           }}
           cancelLabel="Fechar por agora"
           closeLabel="Continuar vendo o PIX"

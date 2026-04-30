@@ -4,7 +4,7 @@ import { ArrowLeft, Loader2, MapPin, QrCode } from 'lucide-react';
 
 import { useCart } from '../../contexts/CartContext';
 import { useCustomerAuth } from '../../contexts/CustomerAuthContext';
-import { getSettings, getSellers, buildApiUrl } from '../../services/api';
+import { getSettings, getSellers, buildApiUrl, getOrderPayment } from '../../services/api';
 import type { Seller, StoreSettings } from '../../types/index';
 import { formatCurrency } from '../../utils/formatters';
 import { assetUrl } from '../../utils/assetUrl';
@@ -325,6 +325,15 @@ const Checkout: React.FC = () => {
             clearCart();
             navigate('/minha-conta');
             addToast('success', 'PIX gerado. Depois do pagamento, envie o comprovante na área de pedidos.', 7000);
+          }}
+          onExpired={() => {
+            if (!pixChargeData) return;
+
+            void getOrderPayment(pixChargeData.orderId).catch(() => null);
+            setPixModalOpen(false);
+            clearCart();
+            navigate('/minha-conta');
+            addToast('error', 'O QR Code PIX expirou. O pedido foi cancelado.', 7000);
           }}
           cancelLabel="Fechar por agora"
           closeLabel="Continuar vendo o PIX"

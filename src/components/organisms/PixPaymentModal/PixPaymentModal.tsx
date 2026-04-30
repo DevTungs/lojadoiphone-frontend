@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { X, Copy, Check } from 'lucide-react';
 import { formatCurrency } from '../../../utils/formatters';
 import styles from './PixPaymentModal.module.css';
@@ -13,6 +13,7 @@ interface PixPaymentModalProps {
   expirationDate: string;
   onClose: () => void;
   onCancel: () => void;
+  onExpired?: () => void;
   cancelLabel?: string;
   closeLabel?: string;
 }
@@ -27,13 +28,19 @@ const PixPaymentModal: React.FC<PixPaymentModalProps> = ({
   expirationDate,
   onClose,
   onCancel,
+  onExpired,
   cancelLabel = 'Fechar por agora',
   closeLabel = 'Continuar vendo o PIX',
 }) => {
   const [copied, setCopied] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<string>('');
+  const expirationHandledRef = useRef(false);
 
   const qrCodeSrc = qrCode.startsWith('data:image') ? qrCode : `data:image/png;base64,${qrCode}`;
+
+  useEffect(() => {
+    expirationHandledRef.current = false;
+  }, [orderId, expirationDate, isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -45,6 +52,10 @@ const PixPaymentModal: React.FC<PixPaymentModalProps> = ({
 
       if (diff <= 0) {
         setTimeRemaining('Expirado');
+        if (!expirationHandledRef.current) {
+          expirationHandledRef.current = true;
+          onExpired?.();
+        }
         return;
       }
 
@@ -56,7 +67,7 @@ const PixPaymentModal: React.FC<PixPaymentModalProps> = ({
     updateTimer();
     const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
-  }, [isOpen, expirationDate]);
+  }, [isOpen, expirationDate, onExpired]);
 
   const handleCopyPixCode = () => {
     navigator.clipboard.writeText(paymentString);

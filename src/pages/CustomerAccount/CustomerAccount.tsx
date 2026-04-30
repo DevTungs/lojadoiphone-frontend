@@ -127,6 +127,15 @@ export default function CustomerAccount() {
   const [pixModalData, setPixModalData] = useState<PixModalState | null>(null)
   const { toasts, addToast, removeToast } = useToast()
 
+  async function loadCustomerOrders() {
+    const response = await fetch(buildApiUrl('/customers/me/orders'), {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    const data = await response.json()
+    setOrders(data || [])
+    return data || []
+  }
+
   useEffect(() => {
     if (isLoading) {
       return
@@ -141,9 +150,7 @@ export default function CustomerAccount() {
       fetch(buildApiUrl('/customers/me'), {
         headers: { Authorization: `Bearer ${token}` },
       }).then((r) => r.json()),
-      fetch(buildApiUrl('/customers/me/orders'), {
-        headers: { Authorization: `Bearer ${token}` },
-      }).then((r) => r.json()),
+      loadCustomerOrders(),
       fetch(buildApiUrl('/settings')).then((r) => r.json()),
     ])
       .then(([customerData, ordersData, settingsData]) => {
@@ -411,6 +418,11 @@ export default function CustomerAccount() {
           onClose={() => setPixModalData(null)}
           onCancel={() => {
             setPixModalData(null)
+          }}
+          onExpired={() => {
+            setPixModalData(null)
+            void loadCustomerOrders().catch(() => null)
+            addToast('error', 'O QR Code PIX expirou. O pedido foi cancelado.', 7000)
           }}
           cancelLabel="Fechar por agora"
           closeLabel="Continuar vendo o PIX"

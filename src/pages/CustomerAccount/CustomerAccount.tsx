@@ -17,9 +17,10 @@ interface OrderItem {
   price: number
 }
 
-interface ActivePayment {
-  qr_code: string
-  payment_string: string
+interface PaymentInfo {
+  status: string
+  qr_code: string | null
+  payment_string: string | null
   external_id: string | null
   expires_at: string | null
   amount: number
@@ -33,7 +34,7 @@ interface Order {
   seller_name: string
   items: OrderItem[]
   verification_word?: string
-  active_payment?: ActivePayment | null
+  payment_info?: PaymentInfo | null
 }
 
 interface CustomerProfile {
@@ -192,26 +193,6 @@ export default function CustomerAccount() {
     handlePixPayment(target)
   }, [loading, orders, pendingPixOrderId])
 
-  // Auto-open modal if an order already has an active valid PIX payment (e.g. after logout/login)
-  useEffect(() => {
-    if (loading || autoPixTriggered.current || pendingPixOrderId) return
-    const withActivePix = orders.find(
-      (o) => o.active_payment && o.active_payment.qr_code && o.active_payment.payment_string
-    )
-    if (!withActivePix || !withActivePix.active_payment) return
-    autoPixTriggered.current = true
-    const p = withActivePix.active_payment
-    setExpanded(withActivePix.id)
-    setPixModalData({
-      orderId: withActivePix.id,
-      amount: p.amount || withActivePix.total_price,
-      qrCode: p.qr_code,
-      paymentString: p.payment_string,
-      externalId: p.external_id ?? '',
-      expirationDate: p.expires_at ?? new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-    })
-  }, [loading, orders, pendingPixOrderId])
-
   function handleLogout() {
     logout()
     navigate('/')
@@ -239,6 +220,19 @@ export default function CustomerAccount() {
     ].join('\n')
 
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank')
+  }
+
+  function openCachedPixModal(order: Order) {
+    const p = order.payment_info
+    if (!p || !p.qr_code || !p.payment_string) return
+    setPixModalData({
+      orderId: order.id,
+      amount: p.amount || order.total_price,
+      qrCode: p.qr_code,
+      paymentString: p.payment_string,
+      externalId: p.external_id ?? '',
+      expirationDate: p.expires_at ?? new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+    })
   }
 
   async function handlePixPayment(order: Order) {
@@ -415,17 +409,48 @@ export default function CustomerAccount() {
                               <p className={styles.verificationBoxHint}>Apresente esta palavra ao vendedor no momento da entrega.</p>
                             </div>
                           )}
+                          {/* PIX expirado */}
+                          {order.payment_info?.status === 'EXPIRED' && (
+                            <div className={styles.pixExpiredBox}>
+                              <Clock size={14} />
+                              PIX expirado — o pedido foi cancelado automaticamente
+                            </div>
+                          )}
                           {(isAwaitingPayment(order.status) || (order.status === 2 && whatsapp)) && (
                             <div className={styles.paymentActions}>
-                              {isAwaitingPayment(order.status) && (
+                              {/* Status 1: nunca teve PIX, gera novo */}
+                              {order.status === 1 && (
                                 <button
                                   className={styles.pixPayBtn}
                                   onClick={() => handlePixPayment(order)}
-                                  title="Gerar ou reabrir cobrança PIX"
+                                  title="Gerar cobrança PIX"
                                   disabled={pixLoadingOrderId === order.id}
                                 >
                                   {pixLoadingOrderId === order.id ? <Loader2 size={14} className={styles.spinIcon} /> : <QrCode size={14} />}
-                                  {pixLoadingOrderId === order.id ? 'Gerando PIX...' : order.status === 2 ? 'Ver PIX novamente' : 'Pagar via PIX'}
+                                  {pixLoadingOrderId === order.id ? 'Gerando PIX...' : 'Pagar via PIX'}
+                                </button>
+                              )}
+                              {/* Status 2: tem PIX ativo, reabre modal com dados em cache */}
+                              {order.status === 2 && order.payment_info?.status === 'ACTIVE' && order.payment_info.qr_code && (
+                                <button
+                                  className={styles.pixPayBtn}
+                                  onClick={() => openCachedPixModal(order)}
+                                  title="Ver QR Code PIX"
+                                >
+                                  <QrCode size={14} />
+                                  Ver QR Code PIX
+                                </button>
+                              )}
+                              {/* Status 2 sem payment_info ativo (fallback): gera novo */}
+                              {order.status === 2 && (!order.payment_info || order.payment_info.status !== 'ACTIVE' || !order.payment_info.qr_code) && (
+                                <button
+                                  className={styles.pixPayBtn}
+                                  onClick={() => handlePixPayment(order)}
+                                  title="Reabrir cobrança PIX"
+                                  disabled={pixLoadingOrderId === order.id}
+                                >
+                                  {pixLoadingOrderId === order.id ? <Loader2 size={14} className={styles.spinIcon} /> : <QrCode size={14} />}
+                                  {pixLoadingOrderId === order.id ? 'Gerando PIX...' : 'Ver PIX novamente'}
                                 </button>
                               )}
                               {order.status === 2 && whatsapp && (

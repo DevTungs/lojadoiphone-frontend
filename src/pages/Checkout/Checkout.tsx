@@ -151,14 +151,15 @@ const Checkout: React.FC = () => {
 
       const data = await response.json();
       if (!response.ok) {
-        addToast('error', data.error || 'Não foi possível gerar o PIX. Tente novamente.', 7000);
-        return;
-      }
-
-      if (data.debug_payment_fallback) {
-        addToast('success', 'Pedido criado em modo debug, mas o PIX falhou. Verifique o backend para detalhes.', 8000);
-        clearCart();
-        navigate('/minha-conta');
+        if (data.order_id) {
+          // Order and items were saved but PIX generation failed.
+          // Clear the cart and send the customer to their account to retry.
+          clearCart();
+          addToast('error', data.error || 'Pedido criado, mas o PIX não pôde ser gerado. Acesse Meus Pedidos para tentar novamente.', 10000);
+          navigate('/minha-conta');
+        } else {
+          addToast('error', data.error || 'Não foi possível finalizar o pedido. Tente novamente.', 7000);
+        }
         return;
       }
 

@@ -209,9 +209,21 @@ export default function CustomerAccount() {
     const response = await fetch(buildApiUrl('/customers/me/orders'), {
       headers: { Authorization: `Bearer ${token}` },
     })
-    const data = await response.json()
-    setOrders(data || [])
-    return data || []
+    const data: Order[] = await response.json()
+    const orders = data || []
+    setOrders(orders)
+    // limpa IDs expirados localmente que o backend já resolveu
+    setExpiredPixOrders((prev) => {
+      if (prev.size === 0) return prev
+      const stillActive = new Set(
+        orders
+          .filter((o) => o.status === 2 && o.payment_info?.status === 'ACTIVE')
+          .map((o) => o.id)
+      )
+      const next = new Set([...prev].filter((id) => stillActive.has(id)))
+      return next.size === prev.size ? prev : next
+    })
+    return orders
   }
 
   useEffect(() => {
@@ -231,14 +243,13 @@ export default function CustomerAccount() {
       loadCustomerOrders(),
       fetch(buildApiUrl('/settings')).then((r) => r.json()),
     ])
-      .then(([customerData, ordersData, settingsData]) => {
+      .then(([customerData, _ordersData, settingsData]) => {
         setCustomer(customerData)
         setEditData({ name: customerData.name, email: customerData.email || '', phone: customerData.phone })
-        setOrders(ordersData || [])
+        // setOrders já foi chamado dentro de loadCustomerOrders()
         const whatsappNumber = settingsData?.whatsapp || ''
         setWhatsapp(whatsappNumber)
         setDeliveryVerificationEnabled(isDeliveryVerificationEnabled(settingsData?.enable_delivery_verification))
-        console.log('Settings carregadas:', { whatsapp: whatsappNumber, settings: settingsData })
       })
       .catch(() => {
         setOrders([])

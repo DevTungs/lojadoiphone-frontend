@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Package, LogOut, CheckCircle, Clock, AlertCircle, Home, User, Mail, Phone, Edit2, MessageCircle, QrCode, Loader2 } from 'lucide-react'
 import { useCustomerAuth } from '../../contexts/CustomerAuthContext'
 import { formatCurrency } from '../../utils/formatters'
@@ -115,6 +115,9 @@ function formatDate(str: string) {
 export default function CustomerAccount() {
   const { token, isLoggedIn, isLoading, logout } = useCustomerAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const pendingPixOrderId = (location.state as { pendingPixOrderId?: number } | null)?.pendingPixOrderId ?? null
+  const autoPixTriggered = useRef(false)
   const [customer, setCustomer] = useState<CustomerProfile | null>(null)
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
@@ -167,6 +170,16 @@ export default function CustomerAccount() {
       })
       .finally(() => setLoading(false))
   }, [isLoading, isLoggedIn, token, navigate])
+
+  // Auto-generate PIX when arriving from checkout with a pending order
+  useEffect(() => {
+    if (loading || autoPixTriggered.current || !pendingPixOrderId) return
+    const target = orders.find((o) => o.id === pendingPixOrderId)
+    if (!target) return
+    autoPixTriggered.current = true
+    setExpanded(pendingPixOrderId)
+    handlePixPayment(target)
+  }, [loading, orders, pendingPixOrderId])
 
   function handleLogout() {
     logout()

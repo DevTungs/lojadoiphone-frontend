@@ -4,7 +4,7 @@ import { ArrowLeft, Loader2, MapPin, QrCode } from 'lucide-react';
 
 import { useCart } from '../../contexts/CartContext';
 import { useCustomerAuth } from '../../contexts/CustomerAuthContext';
-import { getSettings, getSellers, buildApiUrl, getOrderPayment } from '../../services/api';
+import { getSettings, getSellers, buildApiUrl } from '../../services/api';
 import type { Seller, StoreSettings } from '../../types/index';
 import { formatCurrency } from '../../utils/formatters';
 import { assetUrl } from '../../utils/assetUrl';
@@ -12,20 +12,9 @@ import { useToast } from '../../hooks/useToast';
 
 import MainLayout from '../../components/templates/MainLayout/MainLayout';
 import Input from '../../components/atoms/Input/Input';
-import PixPaymentModal from '../../components/organisms/PixPaymentModal/PixPaymentModal';
 import Toast from '../../components/atoms/Toast/Toast';
 
 import styles from './Checkout.module.css';
-
-interface PixChargeData {
-  orderId: number;
-  qrCodeId: string;
-  paymentString: string;
-  qrCode: string;
-  externalId: string;
-  amount: number;
-  expirationDate: string;
-}
 
 interface CheckoutFormData {
   deliveryFullName: string;
@@ -50,8 +39,6 @@ const Checkout: React.FC = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [pixModalOpen, setPixModalOpen] = useState(false);
-  const [pixChargeData, setPixChargeData] = useState<PixChargeData | null>(null);
 
   const [checkoutForm, setCheckoutForm] = useState<CheckoutFormData>({
     deliveryFullName: customer?.name ?? '',
@@ -151,33 +138,12 @@ const Checkout: React.FC = () => {
 
       const data = await response.json();
       if (!response.ok) {
-        if (data.order_id) {
-          // Order and items were saved but PIX generation failed.
-          // Clear the cart and send the customer to their account to retry.
-          clearCart();
-          addToast('error', data.error || 'Pedido criado, mas o PIX não pôde ser gerado. Acesse Meus Pedidos para tentar novamente.', 10000);
-          navigate('/minha-conta');
-        } else {
-          addToast('error', data.error || 'Não foi possível finalizar o pedido. Tente novamente.', 7000);
-        }
+        addToast('error', data.error || 'Não foi possível finalizar o pedido. Tente novamente.', 7000);
         return;
       }
 
-      if (!data.payment?.qrCode || !data.payment?.paymentString) {
-        addToast('error', 'Pedido criado sem dados do QR Code PIX. Tente novamente.', 7000);
-        return;
-      }
-
-      setPixChargeData({
-        orderId: data.id,
-        qrCodeId: data.payment.qrCodeId,
-        paymentString: data.payment.paymentString,
-        qrCode: data.payment.qrCode,
-        externalId: data.payment.externalId,
-        amount: data.payment.amount,
-        expirationDate: data.payment.expirationDate,
-      });
-      setPixModalOpen(true);
+      clearCart();
+      navigate('/minha-conta', { state: { pendingPixOrderId: data.id } });
     } catch {
       addToast('error', 'Erro ao finalizar checkout. Tente novamente.', 7000);
     } finally {
@@ -300,46 +266,11 @@ const Checkout: React.FC = () => {
               onClick={handleSubmit}
               disabled={isSubmitting || cartItems.length === 0}
             >
-              {isSubmitting ? <><Loader2 size={16} className={styles.spin} /> Gerando PIX...</> : <><QrCode size={16} /> Pagar com PIX</>}
+              {isSubmitting ? <><Loader2 size={16} className={styles.spin} /> Criando pedido...</> : <><QrCode size={16} /> Pagar com PIX</>}
             </button>
           </aside>
         </div>
       </section>
-
-      {pixChargeData && (
-        <PixPaymentModal
-          isOpen={pixModalOpen}
-          orderId={pixChargeData.orderId}
-          amount={pixChargeData.amount}
-          qrCode={pixChargeData.qrCode}
-          paymentString={pixChargeData.paymentString}
-          externalId={pixChargeData.externalId}
-          expirationDate={pixChargeData.expirationDate}
-          onClose={() => {
-            setPixModalOpen(false);
-            clearCart();
-            navigate('/minha-conta');
-            addToast('success', 'PIX gerado. Depois do pagamento, envie o comprovante na área de pedidos.', 7000);
-          }}
-          onCancel={() => {
-            setPixModalOpen(false);
-            clearCart();
-            navigate('/minha-conta');
-            addToast('success', 'PIX gerado. Depois do pagamento, envie o comprovante na área de pedidos.', 7000);
-          }}
-          onExpired={() => {
-            if (!pixChargeData) return;
-
-            void getOrderPayment(pixChargeData.orderId).catch(() => null);
-            setPixModalOpen(false);
-            clearCart();
-            navigate('/minha-conta');
-            addToast('error', 'O QR Code PIX expirou. O pedido foi cancelado.', 7000);
-          }}
-          cancelLabel="Fechar por agora"
-          closeLabel="Continuar vendo o PIX"
-        />
-      )}
 
       <Toast toasts={toasts} onClose={removeToast} />
     </MainLayout>

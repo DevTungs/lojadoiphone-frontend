@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent, RefObject } from 'react'
-import { Save, CheckCircle, Upload, Link } from 'lucide-react'
+import { Save, CheckCircle, Upload, Link, RefreshCw, Webhook, AlertCircle } from 'lucide-react'
 import AdminLayout from '../../../components/templates/AdminLayout/AdminLayout'
 import Button from '../../../components/atoms/Button/Button'
 import Input from '../../../components/atoms/Input/Input'
 import Spinner from '../../../components/atoms/Spinner/Spinner'
-import { getSettings, updateSettings } from '../../../services/api'
+import { getAdminTcrWebhooks, getSettings, syncAdminTcrWebhook, updateSettings } from '../../../services/api'
 import { assetUrl } from '../../../utils/assetUrl'
 import type { StoreSettings } from '../../../types/index'
 import styles from './AdminSettings.module.css'
@@ -35,12 +35,47 @@ export default function AdminSettings() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [webhookLoading, setWebhookLoading] = useState(true)
+  const [webhookRefreshing, setWebhookRefreshing] = useState(false)
+  const [webhookSyncing, setWebhookSyncing] = useState(false)
+  const [webhookError, setWebhookError] = useState('')
+  const [webhookSyncMessage, setWebhookSyncMessage] = useState('')
+  const [webhookSecretHint, setWebhookSecretHint] = useState('')
+  const [webhookData, setWebhookData] = useState<{
+    webhooks: Array<{
+      id: number
+      id_chave: number | null
+      url: string
+      eventos: string[]
+      ativo: boolean
+      criado_em: string
+    }>
+    target_url: string | null
+    matched: boolean
+    webhook_secret_configured: boolean
+  } | null>(null)
 
   const [logoTab, setLogoTab] = useState<'url' | 'upload'>('url')
   const [faviconTab, setFaviconTab] = useState<'url' | 'upload'>('url')
   const [uploading, setUploading] = useState<ImageField | null>(null)
   const logoFileRef = useRef<HTMLInputElement | null>(null)
   const faviconFileRef = useRef<HTMLInputElement | null>(null)
+
+  async function loadWebhooks(isRefresh = false) {
+    if (isRefresh) setWebhookRefreshing(true)
+    else setWebhookLoading(true)
+    setWebhookError('')
+    setWebhookSyncMessage('')
+    try {
+      const res = await getAdminTcrWebhooks()
+      setWebhookData(res.data)
+    } catch {
+      setWebhookError('Nao foi possivel carregar os webhooks da TCR.')
+    } finally {
+      if (isRefresh) setWebhookRefreshing(false)
+      else setWebhookLoading(false)
+    }
+  }
 
   useEffect(() => {
     getSettings()
@@ -51,7 +86,37 @@ export default function AdminSettings() {
       }))
       .catch(() => setError('Erro ao carregar configurações.'))
       .finally(() => setLoading(false))
+
+    void loadWebhooks()
   }, [])
+
+  function formatWebhookDate(value: string): string {
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) return value
+    return new Intl.DateTimeFormat('pt-BR', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    }).format(date)
+  }
+
+  async function handleSyncWebhook() {
+    setWebhookSyncing(true)
+    setWebhookError('')
+    setWebhookSyncMessage('')
+    setWebhookSecretHint('')
+    try {
+      const res = await syncAdminTcrWebhook()
+      setWebhookData(res.data)
+      setWebhookSyncMessage(res.data.already_existed ? 'Webhook ja estava registrado e ativo.' : 'Webhook sincronizado com sucesso.')
+      if (res.data.secret_assinatura) {
+        setWebhookSecretHint(`Secret gerado na TCR: ${res.data.secret_assinatura}. Salve no backend em TCR_WEBHOOK_SECRET.`)
+      }
+    } catch {
+      setWebhookError('Nao foi possivel sincronizar o webhook agora.')
+    } finally {
+      setWebhookSyncing(false)
+    }
+  }
 
   async function handleUpload(file: File, field: ImageField) {
     const token = localStorage.getItem('auth_token')
@@ -203,6 +268,79 @@ export default function AdminSettings() {
               </Button>
             </div>
           </form>
+
+          <div className={styles.webhookPanel}>
+            <div className={styles.webhookHeader}>
+              <div>
+                <h3 className={styles.webhookTitle}>Webhooks TCR</h3>
+                <p className={styles.webhookSubtitle}>Visualize os webhooks cadastrados para monitorar pagamentos PIX.</p>
+              </div>
+              <div className={styles.webhookActions}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void loadWebhooks(true)}
+                  loading={webhookRefreshing}
+                  leftIcon={<RefreshCw size={14} />}
+                >
+                  Atualizar
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => void handleSyncWebhook()}
+                  loading={webhookSyncing}
+                  leftIcon={<Webhook size={14} />}
+                >
+                  Sincronizar webhook
+                </Button>
+              </div>
+            </div>
+
+            {webhookSyncMessage && <div className={styles.webhookSuccess}>{webhookSyncMessage}</div>}
+            {webhookSecretHint && <div className={styles.webhookSecretHint}>{webhookSecretHint}</div>}
+
+            {webhookLoading ? (
+              <div className={styles.webhookLoading}><Spinner size="sm" /> Carregando webhooks...</div>
+            ) : webhookError ? (
+              <div className={styles.webhookError}><AlertCircle size={16} /> {webhookError}</div>
+            ) : webhookData ? (
+              <>
+                <div className={styles.webhookMetaRow}>
+                  <span className={styles.webhookMetaLabel}>Webhook esperado:</span>
+                  <span className={styles.webhookMetaValue}>{webhookData.target_url || 'APP_PUBLIC_URL nao configurado'}</span>
+                </div>
+                <div className={styles.webhookStatusRow}>
+                  <span className={`${styles.statusPill} ${webhookData.matched ? styles.statusOk : styles.statusWarn}`}>
+                    <Webhook size={13} /> {webhookData.matched ? 'Webhook ativo encontrado' : 'Webhook alvo nao encontrado'}
+                  </span>
+                  <span className={`${styles.statusPill} ${webhookData.webhook_secret_configured ? styles.statusOk : styles.statusWarn}`}>
+                    {webhookData.webhook_secret_configured ? 'Assinatura configurada' : 'Sem TCR_WEBHOOK_SECRET'}
+                  </span>
+                </div>
+
+                {webhookData.webhooks.length === 0 ? (
+                  <p className={styles.webhookEmpty}>Nenhum webhook cadastrado na TCR.</p>
+                ) : (
+                  <div className={styles.webhookList}>
+                    {webhookData.webhooks.map((wh) => (
+                      <div key={wh.id} className={styles.webhookItem}>
+                        <div className={styles.webhookItemTop}>
+                          <span className={styles.webhookId}>ID {wh.id}</span>
+                          <span className={`${styles.statusPill} ${wh.ativo ? styles.statusOk : styles.statusOff}`}>
+                            {wh.ativo ? 'Ativo' : 'Inativo'}
+                          </span>
+                        </div>
+                        <p className={styles.webhookUrl}>{wh.url}</p>
+                        <p className={styles.webhookInfo}>Eventos: {wh.eventos.join(', ') || 'todos'}</p>
+                        <p className={styles.webhookInfo}>Criado em: {formatWebhookDate(wh.criado_em)}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : null}
+          </div>
         </div>
       </div>
     </AdminLayout>

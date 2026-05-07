@@ -100,6 +100,27 @@ export interface PixPaymentResponse {
   reused?: boolean;
 }
 
+export interface AdminTcrWebhook {
+  id: number;
+  id_chave: number | null;
+  url: string;
+  eventos: string[];
+  ativo: boolean;
+  criado_em: string;
+}
+
+export interface AdminTcrWebhookListResponse {
+  webhooks: AdminTcrWebhook[];
+  target_url: string | null;
+  matched: boolean;
+  webhook_secret_configured: boolean;
+}
+
+export interface AdminTcrWebhookSyncResponse extends AdminTcrWebhookListResponse {
+  already_existed: boolean;
+  secret_assinatura: string | null;
+}
+
 export const createOrder = (
   data: CreateOrderPayload
 ): Promise<{ data: Order }> => api.post('/orders', data);
@@ -131,6 +152,12 @@ export const generateOrderPixPayment = (
 export const getOrderPayment = (
   id: number
 ): Promise<{ data: PixPayment }> => api.get(`/orders/${id}/payment`);
+
+export const getAdminTcrWebhooks = (): Promise<{ data: AdminTcrWebhookListResponse }> =>
+  api.get('/orders/payment/webhooks');
+
+export const syncAdminTcrWebhook = (): Promise<{ data: AdminTcrWebhookSyncResponse }> =>
+  api.post('/orders/payment/webhooks/sync');
 
 // ─── Sellers ─────────────────────────────────────────────────────────────────
 

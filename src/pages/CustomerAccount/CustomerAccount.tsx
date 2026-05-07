@@ -17,6 +17,14 @@ interface OrderItem {
   price: number
 }
 
+interface ActivePayment {
+  qr_code: string
+  payment_string: string
+  external_id: string | null
+  expires_at: string | null
+  amount: number
+}
+
 interface Order {
   id: number
   status: number
@@ -25,6 +33,7 @@ interface Order {
   seller_name: string
   items: OrderItem[]
   verification_word?: string
+  active_payment?: ActivePayment | null
 }
 
 interface CustomerProfile {
@@ -181,6 +190,26 @@ export default function CustomerAccount() {
     window.history.replaceState({}, '')
     setExpanded(pendingPixOrderId)
     handlePixPayment(target)
+  }, [loading, orders, pendingPixOrderId])
+
+  // Auto-open modal if an order already has an active valid PIX payment (e.g. after logout/login)
+  useEffect(() => {
+    if (loading || autoPixTriggered.current || pendingPixOrderId) return
+    const withActivePix = orders.find(
+      (o) => o.active_payment && o.active_payment.qr_code && o.active_payment.payment_string
+    )
+    if (!withActivePix || !withActivePix.active_payment) return
+    autoPixTriggered.current = true
+    const p = withActivePix.active_payment
+    setExpanded(withActivePix.id)
+    setPixModalData({
+      orderId: withActivePix.id,
+      amount: p.amount || withActivePix.total_price,
+      qrCode: p.qr_code,
+      paymentString: p.payment_string,
+      externalId: p.external_id ?? '',
+      expirationDate: p.expires_at ?? new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+    })
   }, [loading, orders, pendingPixOrderId])
 
   function handleLogout() {

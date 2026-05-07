@@ -52,7 +52,9 @@ export default function AdminSettings() {
     }>
     target_url: string | null
     matched: boolean
+    matched_count: number
     webhook_secret_configured: boolean
+    auth_mode: 'hmac_secret' | 'token' | 'api_credentials' | 'none'
   } | null>(null)
 
   const [logoTab, setLogoTab] = useState<'url' | 'upload'>('url')
@@ -97,6 +99,13 @@ export default function AdminSettings() {
       day: '2-digit', month: '2-digit', year: 'numeric',
       hour: '2-digit', minute: '2-digit',
     }).format(date)
+  }
+
+  function getWebhookAuthModeLabel(mode: 'hmac_secret' | 'token' | 'api_credentials' | 'none'): string {
+    if (mode === 'hmac_secret') return 'Assinatura HMAC via TCR_WEBHOOK_SECRET'
+    if (mode === 'token') return 'Token simples via TCR_WEBHOOK_TOKEN'
+    if (mode === 'api_credentials') return 'Fallback por TCR_API_KEY_ID/TCR_API_SECRET'
+    return 'Nenhum modo configurado'
   }
 
   async function handleSyncWebhook() {
@@ -310,12 +319,16 @@ export default function AdminSettings() {
                   <span className={styles.webhookMetaLabel}>Webhook esperado:</span>
                   <span className={styles.webhookMetaValue}>{webhookData.target_url || 'APP_PUBLIC_URL nao configurado'}</span>
                 </div>
+                <div className={styles.webhookMetaRow}>
+                  <span className={styles.webhookMetaLabel}>Autenticacao ativa:</span>
+                  <span className={styles.webhookMetaValue}>{getWebhookAuthModeLabel(webhookData.auth_mode)}</span>
+                </div>
                 <div className={styles.webhookStatusRow}>
                   <span className={`${styles.statusPill} ${webhookData.matched ? styles.statusOk : styles.statusWarn}`}>
-                    <Webhook size={13} /> {webhookData.matched ? 'Webhook ativo encontrado' : 'Webhook alvo nao encontrado'}
+                    <Webhook size={13} /> {webhookData.matched ? `Webhook ativo encontrado (${webhookData.matched_count})` : 'Webhook alvo nao encontrado'}
                   </span>
-                  <span className={`${styles.statusPill} ${webhookData.webhook_secret_configured ? styles.statusOk : styles.statusWarn}`}>
-                    {webhookData.webhook_secret_configured ? 'Assinatura configurada' : 'Sem TCR_WEBHOOK_SECRET'}
+                  <span className={`${styles.statusPill} ${webhookData.auth_mode !== 'none' ? styles.statusOk : styles.statusWarn}`}>
+                    {webhookData.webhook_secret_configured ? 'Assinatura configurada' : getWebhookAuthModeLabel(webhookData.auth_mode)}
                   </span>
                 </div>
 

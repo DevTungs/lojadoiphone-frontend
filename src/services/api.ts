@@ -113,7 +113,9 @@ export interface AdminTcrWebhookListResponse {
   webhooks: AdminTcrWebhook[];
   target_url: string | null;
   matched: boolean;
+  matched_count: number;
   webhook_secret_configured: boolean;
+  auth_mode: 'hmac_secret' | 'token' | 'api_credentials' | 'none';
 }
 
 export interface AdminTcrWebhookSyncResponse extends AdminTcrWebhookListResponse {

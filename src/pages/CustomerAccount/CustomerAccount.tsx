@@ -210,7 +210,8 @@ export default function CustomerAccount() {
       headers: { Authorization: `Bearer ${token}` },
     })
     const data: Order[] = await response.json()
-    const orders = data || []
+    // O MySQL pode retornar status como string — normaliza para número
+    const orders: Order[] = (data || []).map((o) => ({ ...o, status: Number(o.status) }))
     console.log('[CustomerAccount] loadCustomerOrders: pedidos recebidos =', orders.map((o) => ({
       id: o.id,
       status: o.status,

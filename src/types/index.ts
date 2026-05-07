@@ -32,6 +32,18 @@ export interface OrderItem {
   product_name?: string;
 }
 
+export interface OrderPaymentInfo {
+  id?: number;
+  provider?: string;
+  status?: string;
+  payment_string?: string | null;
+  qr_code?: string | null;
+  external_id?: string | null;
+  expires_at?: string | null;
+  paid_at?: string | null;
+  amount?: number;
+}
+
 export interface Order {
   id: number;
   customer_name: string;
@@ -53,6 +65,7 @@ export interface Order {
   verification_word?: string;
   checkout_phone?: string;
   items?: OrderItem[];
+  payment?: OrderPaymentInfo | null;
 }
 
 export interface CartItem {

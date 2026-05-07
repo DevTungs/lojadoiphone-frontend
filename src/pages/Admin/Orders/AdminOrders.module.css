@@ -207,6 +207,18 @@
   white-space: nowrap;
 }
 
+.detailItemHighlight {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+}
+
+.detailValueStrong {
+  font-weight: var(--weight-semibold);
+  color: #166534;
+}
+
 .emptyRow {
   text-align: center;
   color: var(--gray-400);

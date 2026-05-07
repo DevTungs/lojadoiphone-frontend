@@ -62,6 +62,15 @@ function normalizePixPayment(raw: unknown): PixModalState | null {
 function isAwaitingPayment(status: number): boolean {
   return status === 1 || status === 2
 }
+
+function formatPaidAt(value: string): string {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  }).format(date)
+}
 import styles from './AdminOrders.module.css'
 
 const STATUS_OPTIONS = [0, 1, 2, 3, 4, 5] as const
@@ -449,6 +458,18 @@ export default function AdminOrders() {
                       {getOrderStatusLabel(selectedOrder.status)}
                     </span>
                   </div>
+                  {selectedOrder.payment?.status && (
+                    <div className={styles.detailItem}>
+                      <span className={styles.detailLabel}>Status pagamento</span>
+                      <span className={styles.detailValue}>{selectedOrder.payment.status}</span>
+                    </div>
+                  )}
+                  {selectedOrder.payment?.paid_at && (
+                    <div className={`${styles.detailItem} ${styles.detailItemHighlight}`}>
+                      <span className={styles.detailLabel}>Pagamento confirmado em</span>
+                      <span className={styles.detailValueStrong}>{formatPaidAt(selectedOrder.payment.paid_at)}</span>
+                    </div>
+                  )}
                   {selectedOrder.delivery_full_name && (
                     <div className={styles.detailItem}>
                       <span className={styles.detailLabel}>Nome entrega</span>

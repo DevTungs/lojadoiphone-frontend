@@ -466,24 +466,6 @@ export default function CustomerAccount() {
                       </div>
                     </button>
 
-                                    {/* Inline PIX QR code – visible without expanding */}
-                    {order.status === 2 &&
-                      order.payment_info?.status === 'ACTIVE' &&
-                      order.payment_info?.qr_code &&
-                      order.payment_info?.expires_at &&
-                      !expiredPixOrders.has(order.id) && (
-                        <InlinePixQr
-                          qrCode={order.payment_info.qr_code}
-                          paymentString={order.payment_info.payment_string ?? ''}
-                          expiresAt={order.payment_info.expires_at}
-                          onExpired={() => {
-                            setExpiredPixOrders((prev) => new Set(prev).add(order.id))
-                            void loadCustomerOrders().catch(() => null)
-                            addToast('error', 'O QR Code PIX expirou. O pedido foi cancelado.', 7000)
-                          }}
-                        />
-                      )}
-
                     {expanded === order.id && (
                       <div className={styles.orderBody}>
                         <div className={styles.itemsList}>

@@ -177,6 +177,8 @@ export default function CustomerAccount() {
     const target = orders.find((o) => o.id === pendingPixOrderId)
     if (!target) return
     autoPixTriggered.current = true
+    // Clear location state so F5 doesn't re-trigger the modal
+    window.history.replaceState({}, '')
     setExpanded(pendingPixOrderId)
     handlePixPayment(target)
   }, [loading, orders, pendingPixOrderId])
@@ -384,7 +386,7 @@ export default function CustomerAccount() {
                               <p className={styles.verificationBoxHint}>Apresente esta palavra ao vendedor no momento da entrega.</p>
                             </div>
                           )}
-                          {whatsapp && (
+                          {(isAwaitingPayment(order.status) || (order.status === 2 && whatsapp)) && (
                             <div className={styles.paymentActions}>
                               {isAwaitingPayment(order.status) && (
                                 <button
@@ -397,7 +399,7 @@ export default function CustomerAccount() {
                                   {pixLoadingOrderId === order.id ? 'Gerando PIX...' : order.status === 2 ? 'Ver PIX novamente' : 'Pagar via PIX'}
                                 </button>
                               )}
-                              {order.status === 2 && (
+                              {order.status === 2 && whatsapp && (
                                 <button
                                   className={styles.contactFinanceBtn}
                                   onClick={() => handleContactFinance(order)}

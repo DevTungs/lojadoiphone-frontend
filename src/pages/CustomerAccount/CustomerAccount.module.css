@@ -528,3 +528,65 @@
 .spinIcon {
   animation: spin 1s linear infinite;
 }
+
+/* ── Inline PIX QR Code ─────────────────────────────────────────────── */
+.inlinePixBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+  border: 1.5px solid #38bdf8;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 4px 0 2px;
+}
+
+.inlinePixHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #0369a1;
+  width: 100%;
+}
+
+.inlinePixTimer {
+  margin-left: auto;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #dc2626;
+  background: #fee2e2;
+  border-radius: 6px;
+  padding: 2px 7px;
+}
+
+.inlinePixQr {
+  width: 160px;
+  height: 160px;
+  border-radius: 8px;
+  border: 1px solid #bae6fd;
+  object-fit: contain;
+}
+
+.inlinePixCopy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  background: #0ea5e9;
+  color: #fff;
+  border: none;
+  border-radius: 9999px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.inlinePixCopy:hover {
+  background: #0284c7;
+}

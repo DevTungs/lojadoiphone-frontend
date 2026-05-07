@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Package, LogOut, CheckCircle, Clock, AlertCircle, Home, User, Mail, Phone, Edit2, MessageCircle, QrCode, Loader2 } from 'lucide-react'
+import { Package, LogOut, CheckCircle, Clock, AlertCircle, Home, User, Mail, Phone, Edit2, MessageCircle, QrCode, Loader2, Copy, Check } from 'lucide-react'
 import { useCustomerAuth } from '../../contexts/CustomerAuthContext'
 import { formatCurrency } from '../../utils/formatters'
 import { buildApiUrl, generateOrderPixPayment } from '../../services/api'
@@ -82,6 +82,70 @@ function normalizePixPayment(raw: unknown): PixModalState | null {
   }
 }
 
+function InlinePixQr({
+  qrCode,
+  paymentString,
+  expiresAt,
+  onExpired,
+}: {
+  qrCode: string
+  paymentString: string
+  expiresAt: string
+  onExpired: () => void
+}) {
+  const [timeRemaining, setTimeRemaining] = useState<string>('')
+  const [expired, setExpired] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const expiredRef = useRef(false)
+  const qrSrc = qrCode.startsWith('data:image') ? qrCode : `data:image/png;base64,${qrCode}`
+
+  useEffect(() => {
+    expiredRef.current = false
+    setExpired(false)
+    const updateTimer = () => {
+      const diff = new Date(expiresAt).getTime() - Date.now()
+      if (diff <= 0) {
+        setTimeRemaining('Expirado')
+        if (!expiredRef.current) {
+          expiredRef.current = true
+          setExpired(true)
+          onExpired()
+        }
+        return
+      }
+      const minutes = Math.floor(diff / 60000)
+      const seconds = Math.floor((diff % 60000) / 1000)
+      setTimeRemaining(`${minutes}m ${seconds}s`)
+    }
+    updateTimer()
+    const interval = setInterval(updateTimer, 1000)
+    return () => clearInterval(interval)
+  }, [expiresAt, onExpired])
+
+  function handleCopy() {
+    navigator.clipboard.writeText(paymentString)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  if (expired) return null
+
+  return (
+    <div className={styles.inlinePixBox}>
+      <div className={styles.inlinePixHeader}>
+        <QrCode size={14} />
+        <span>Pague via PIX</span>
+        <span className={styles.inlinePixTimer}>⏱ {timeRemaining}</span>
+      </div>
+      <img src={qrSrc} alt="QR Code PIX" className={styles.inlinePixQr} />
+      <button className={styles.inlinePixCopy} onClick={handleCopy}>
+        {copied ? <Check size={14} /> : <Copy size={14} />}
+        {copied ? 'Copiado!' : 'Copiar código PIX'}
+      </button>
+    </div>
+  )
+}
+
 function isAwaitingPayment(status: number): boolean {
   return status === 1 || status === 2
 }
@@ -138,6 +202,7 @@ export default function CustomerAccount() {
   const [deliveryVerificationEnabled, setDeliveryVerificationEnabled] = useState(true)
   const [pixLoadingOrderId, setPixLoadingOrderId] = useState<number | null>(null)
   const [pixModalData, setPixModalData] = useState<PixModalState | null>(null)
+  const [expiredPixOrders, setExpiredPixOrders] = useState<Set<number>>(new Set())
   const { toasts, addToast, removeToast } = useToast()
 
   async function loadCustomerOrders() {
@@ -381,6 +446,24 @@ export default function CustomerAccount() {
                         <span className={styles.orderTotal}>{formatCurrency(order.total_price)}</span>
                       </div>
                     </button>
+
+                                    {/* Inline PIX QR code – visible without expanding */}
+                    {order.status === 2 &&
+                      order.payment_info?.status === 'ACTIVE' &&
+                      order.payment_info?.qr_code &&
+                      order.payment_info?.expires_at &&
+                      !expiredPixOrders.has(order.id) && (
+                        <InlinePixQr
+                          qrCode={order.payment_info.qr_code}
+                          paymentString={order.payment_info.payment_string ?? ''}
+                          expiresAt={order.payment_info.expires_at}
+                          onExpired={() => {
+                            setExpiredPixOrders((prev) => new Set(prev).add(order.id))
+                            void loadCustomerOrders().catch(() => null)
+                            addToast('error', 'O QR Code PIX expirou. O pedido foi cancelado.', 7000)
+                          }}
+                        />
+                      )}
 
                     {expanded === order.id && (
                       <div className={styles.orderBody}>

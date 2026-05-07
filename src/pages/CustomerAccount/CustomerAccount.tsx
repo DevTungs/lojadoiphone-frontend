@@ -211,6 +211,13 @@ export default function CustomerAccount() {
     })
     const data: Order[] = await response.json()
     const orders = data || []
+    console.log('[CustomerAccount] loadCustomerOrders: pedidos recebidos =', orders.map((o) => ({
+      id: o.id,
+      status: o.status,
+      payment_info: o.payment_info
+        ? { status: o.payment_info.status, has_qr: !!o.payment_info.qr_code, expires_at: o.payment_info.expires_at }
+        : null,
+    })))
     setOrders(orders)
     // limpa IDs expirados localmente que o backend já resolveu
     setExpiredPixOrders((prev) => {

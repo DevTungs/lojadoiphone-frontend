@@ -490,7 +490,7 @@ export default function CustomerAccount() {
                           {order.payment_info?.status === 'EXPIRED' && (
                             <div className={styles.pixExpiredBox}>
                               <Clock size={14} />
-                              PIX expirado — o pedido foi cancelado automaticamente
+                              PIX expirado — gere um novo QR Code PIX para pagar
                             </div>
                           )}
                           {(isAwaitingPayment(order.status) || (order.status === 2 && whatsapp)) && (
@@ -568,7 +568,7 @@ export default function CustomerAccount() {
           onExpired={() => {
             setPixModalData(null)
             void loadCustomerOrders().catch(() => null)
-            addToast('error', 'O QR Code PIX expirou. O pedido foi cancelado.', 7000)
+            addToast('error', 'O QR Code PIX expirou. Gere um novo PIX para concluir o pagamento.', 7000)
           }}
           cancelLabel="Fechar por agora"
           closeLabel="Continuar vendo o PIX"

@@ -522,7 +522,7 @@ const OrderTracking: React.FC = () => {
               void reloadSelectedOrder(expiredOrderId).catch(() => null);
             }
 
-            addToast('error', 'O QR Code PIX expirou. O pedido foi cancelado.', 7000);
+            addToast('error', 'O QR Code PIX expirou. Gere um novo PIX para concluir o pagamento.', 7000);
           }}
           cancelLabel="Fechar por agora"
           closeLabel="Continuar vendo o PIX"

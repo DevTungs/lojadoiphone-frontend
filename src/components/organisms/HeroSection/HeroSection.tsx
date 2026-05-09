@@ -14,17 +14,16 @@ interface HeroSectionProps {
 }
 
 const ITEMS = [
-  { src: '/hero-ip17promax-official.png', alt: 'iPhone 17 Pro Max',        label: 'iPhone 17 Pro Max'        },
-  { src: '/hero-ip17-official.png',       alt: 'iPhone 17',                label: 'iPhone 17'                },
-  { src: '/hero-ip16promax.png',          alt: 'iPhone 16 Pro Max',        label: 'iPhone 16 Pro Max'        },
-  { src: '/hero-ip16.png',               alt: 'iPhone 16',                label: 'iPhone 16'                },
-  { src: '/hero-ip17promax-silver.png',   alt: 'iPhone 17 Pro Max Silver', label: 'iPhone 17 Pro Max Silver' },
-  { src: '/hero-watch.png',              alt: 'Apple Watch',              label: 'Apple Watch', isWatch: true },
+  { src: '/hero-ip17promax-official.png', alt: 'iPhone 17 Pro Max', label: 'iPhone 17 Pro Max' },
+  { src: '/hero-ip17-official.png', alt: 'iPhone 17', label: 'iPhone 17' },
+  { src: '/hero-ip16promax.png', alt: 'iPhone 16 Pro Max', label: 'iPhone 16 Pro Max' },
+  { src: '/hero-ip17promax-silver.png', alt: 'iPhone 17 Pro Max Silver', label: 'iPhone 17 Pro Max Silver' },
+  { src: '/hero-watch.png', alt: 'Apple Watch', label: 'Apple Watch', isWatch: true },
 ];
 
 export default function HeroSection({ logoUrl, storeName, promotions = [] }: HeroSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
-  const stageRef   = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const touchStartXRef = useRef<number | null>(null);
   const touchStartYRef = useRef<number | null>(null);
   const hasSwipedRef = useRef(false);
@@ -85,14 +84,14 @@ export default function HeroSection({ logoUrl, storeName, promotions = [] }: Her
 
   useEffect(() => {
     const section = sectionRef.current;
-    const stage   = stageRef.current;
+    const stage = stageRef.current;
     if (!section) return;
 
     const onMove = (e: MouseEvent) => {
       const r = section.getBoundingClientRect();
       if (stage) {
-        const tx = ((e.clientY - r.top  - r.height / 2) / r.height) * 6;
-        const ty = ((e.clientX - r.left - r.width  / 2) / r.width ) * -6;
+        const tx = ((e.clientY - r.top - r.height / 2) / r.height) * 6;
+        const ty = ((e.clientX - r.left - r.width / 2) / r.width) * -6;
         stage.style.transform =
           `perspective(1200px) rotateX(${tx}deg) rotateY(${ty}deg)`;
       }
@@ -110,17 +109,13 @@ export default function HeroSection({ logoUrl, storeName, promotions = [] }: Her
     };
   }, []);
 
-  useEffect(() => {
-    if (activeIdx >= totalItems) {
-      setActiveIdx(0);
-    }
-  }, [activeIdx, totalItems]);
+  const safeIdx = totalItems > 0 ? Math.min(activeIdx, totalItems - 1) : 0;
 
   const getPos = (i: number): 'center' | 'left' | 'right' | 'hidden' => {
-    const len  = totalItems;
-    const diff = ((i - activeIdx) + len) % len;
-    if (diff === 0)       return 'center';
-    if (diff === 1)       return 'right';
+    const len = totalItems;
+    const diff = ((i - safeIdx) + len) % len;
+    if (diff === 0) return 'center';
+    if (diff === 1) return 'right';
     if (diff === len - 1) return 'left';
     return 'hidden';
   };
@@ -191,20 +186,20 @@ export default function HeroSection({ logoUrl, storeName, promotions = [] }: Her
               {/* Título + preço — topo do stage */}
               <div className={styles.promoTop}>
                 <span className={styles.promoOfertaLabel}>Oferta do dia</span>
-                   <span className={styles.carouselPrice}>
-                  {promotions[activeIdx]?.price.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                <span className={styles.carouselPrice}>
+                  {promotions[safeIdx]?.price.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
                 </span>
               </div>
 
               {/* rodapé do stage */}
               <div className={styles.carousel}>
-                 <span className={styles.promoItemTitle}>{promotions[activeIdx]?.title}</span>
-            
+                <span className={styles.promoItemTitle}>{promotions[safeIdx]?.title}</span>
+
                 <div className={styles.carouselDots}>
                   {promotions.map((_, i) => (
                     <button
                       key={i}
-                      className={[styles.dot, i === activeIdx ? styles.dotActive : ''].join(' ')}
+                      className={[styles.dot, i === safeIdx ? styles.dotActive : ''].join(' ')}
                       onClick={() => setActiveIdx(i)}
                       aria-label={promotions[i].title}
                     />
@@ -233,14 +228,14 @@ export default function HeroSection({ logoUrl, storeName, promotions = [] }: Her
               })}
 
               <div className={styles.carousel}>
-                <span className={styles.carouselLabel}>
-                  {ITEMS[activeIdx].label}
+                <span className={styles.promoItemTitle}>
+                  {ITEMS[safeIdx].label}
                 </span>
                 <div className={styles.carouselDots}>
                   {ITEMS.map((_, i) => (
                     <button
                       key={i}
-                      className={[styles.dot, i === activeIdx ? styles.dotActive : ''].join(' ')}
+                      className={[styles.dot, i === safeIdx ? styles.dotActive : ''].join(' ')}
                       onClick={() => setActiveIdx(i)}
                       aria-label={ITEMS[i].label}
                     />

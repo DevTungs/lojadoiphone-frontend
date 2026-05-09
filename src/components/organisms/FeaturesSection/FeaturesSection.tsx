@@ -16,17 +16,17 @@ export default function FeaturesSection() {
         </div>
         <div className={styles.grid}>
           <FeatureCard
-            icon={<Shield size={28} strokeWidth={1.75} />}
+            icon={<Shield size={28} strokeWidth={1.5} />}
             title="100% Autêntico"
             text="Apenas produtos originais. Qualidade Apple garantida em cada item."
           />
           <FeatureCard
-            icon={<MapPin size={28} strokeWidth={1.75} />}
+            icon={<MapPin size={28} strokeWidth={1.5} />}
             title="Retirada na loja"
             text="Sem entrega disponível. Retire seu produto diretamente em nossa loja."
           />
           <FeatureCard
-            icon={<MessageCircle size={28} strokeWidth={1.75} />}
+            icon={<MessageCircle size={28} strokeWidth={1.5} />}
             title="Pagamento via WhatsApp"
             text="Finalize sua compra diretamente pelo WhatsApp de forma rápida e segura."
           />

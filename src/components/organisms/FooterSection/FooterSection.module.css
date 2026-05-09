@@ -1,0 +1,196 @@
+/* ══════════════════════════════════════════
+   FOOTER SECTION
+   ══════════════════════════════════════════ */
+.section {
+  background: #060d10;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 72px 48px 64px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* grade sutil de fundo */
+.section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.012) 1px, transparent 1px);
+  background-size: 68px 68px;
+  pointer-events: none;
+}
+
+/* brilho verde no topo */
+.section::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 219, 132, 0.45), transparent);
+}
+
+.wrapper {
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ── GRID 4 COLUNAS ── */
+.grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 48px 40px;
+  align-items: start;
+}
+
+/* ══════════════════════════════════════════
+   COLUNA GENÉRICA
+   ══════════════════════════════════════════ */
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.colTitle {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: #00db84;
+  margin: 0 0 20px;
+}
+
+/* ══════════════════════════════════════════
+   COL 1 — MARCA
+   ══════════════════════════════════════════ */
+.brand {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.3px;
+  margin-bottom: 14px;
+  display: block;
+}
+
+.brandDesc {
+  font-size: 13.5px;
+  color: rgba(255, 255, 255, 0.38);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ══════════════════════════════════════════
+   COL 2 — LINKS
+   ══════════════════════════════════════════ */
+.linkList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.navLink {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.52);
+  text-decoration: none;
+  transition: color 0.18s;
+  width: fit-content;
+}
+
+.navLink:hover {
+  color: #00db84;
+}
+
+/* ══════════════════════════════════════════
+   COL 3 — ENDEREÇO
+   ══════════════════════════════════════════ */
+.address {
+  font-style: normal;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.52);
+  line-height: 1.8;
+  margin: 0 0 20px;
+}
+
+.mapButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mapBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s;
+  width: fit-content;
+}
+
+.mapBtn:hover {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* ══════════════════════════════════════════
+   COL 4 — REDES SOCIAIS
+   ══════════════════════════════════════════ */
+.socialGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.socialBtn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s;
+  width: fit-content;
+}
+
+.socialBtn:hover {
+  background: rgba(0, 219, 132, 0.08);
+  border-color: rgba(0, 219, 132, 0.22);
+  color: #00db84;
+  transform: translateY(-1px);
+}
+
+/* ══════════════════════════════════════════
+   RESPONSIVO
+   ══════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 40px 32px;
+  }
+}
+
+@media (max-width: 640px) {
+  .section { padding: 52px 24px 48px; }
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+}

@@ -293,16 +293,6 @@
   pointer-events: none;
 }
 
-.carouselLabel {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  color: rgba(255,255,255,.45);
-  white-space: nowrap;
-  animation: fadeIn .3s ease;
-}
-
 .carouselPrice {
   font-size: 26px;
   font-weight: 700;

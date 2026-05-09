@@ -4,23 +4,36 @@
 
 .section {
   position: relative;
-  background: #ffffff;
-  padding: 80px 40px 96px;
+  background: linear-gradient(180deg, #f0fff8 0%, #ffffff 50%);
+  padding: 90px 40px 110px;
   overflow: hidden;
   border-top: 1px solid var(--gray-200);
 }
 
-/* brilho central sutil */
+/* linha verde no topo */
 .section::before {
   content: '';
   position: absolute;
   top: 0; left: 50%;
   transform: translateX(-50%);
-  width: 700px; height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(0,219,132,.4), transparent);
+  width: 900px; height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0,219,132,.7), transparent);
+}
+
+/* brilho central de fundo */
+.section::after {
+  content: '';
+  position: absolute;
+  top: -60px; left: 50%;
+  transform: translateX(-50%);
+  width: 900px; height: 420px;
+  background: radial-gradient(ellipse at center, rgba(0,219,132,.07) 0%, transparent 70%);
+  pointer-events: none;
 }
 
 .wrapper {
+  position: relative;
+  z-index: 1;
   max-width: 1180px;
   margin: 0 auto;
 }
@@ -31,29 +44,47 @@
   margin-bottom: 56px;
 }
 
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0,219,132,.12);
+  border: 1px solid rgba(0,219,132,.3);
+  color: #00a865;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+}
+
 .title {
-  font-size: clamp(26px, 3vw, 36px);
-  font-weight: 700;
+  font-size: clamp(26px, 3.2vw, 40px);
+  font-weight: 800;
   color: var(--gray-900);
-  margin: 0 0 10px;
-  letter-spacing: -.3px;
+  margin: 0 0 12px;
+  letter-spacing: -.4px;
+  line-height: 1.2;
 }
 
 .subtitle {
-  font-size: 15px;
+  font-size: clamp(14px, 1.2vw, 16px);
   color: var(--gray-500);
-  margin: 0;
-  line-height: 1.65;
+  margin: 0 auto;
+  max-width: 480px;
+  line-height: 1.7;
 }
 
 /* grid */
 .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  gap: 24px;
 }
 
 @media (max-width: 860px) {
-  .grid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
-  .section { padding: 64px 24px 80px; }
+  .grid { grid-template-columns: 1fr; max-width: 440px; margin: 0 auto; }
+  .section { padding: 72px 24px 88px; }
 }

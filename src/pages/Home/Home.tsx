@@ -8,6 +8,7 @@ import { useCart } from '../../contexts/CartContext';
 
 import MainLayout from '../../components/templates/MainLayout/MainLayout';
 import HeroSection from '../../components/organisms/HeroSection/HeroSection';
+import SellerSection from '../../components/organisms/SellerSection/SellerSection';
 import ProductGrid from '../../components/organisms/ProductGrid/ProductGrid';
 import FeaturesSection from '../../components/organisms/FeaturesSection/FeaturesSection';
 import CartDrawer from '../../components/organisms/CartDrawer/CartDrawer';
@@ -71,6 +72,8 @@ const Home: React.FC = () => {
       </section>
 
       <FeaturesSection />
+
+      <SellerSection />
 
       <CartDrawer
         isOpen={isCartOpen}

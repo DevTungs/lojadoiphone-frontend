@@ -408,6 +408,48 @@
     50%     { transform: translate(calc(-50% + 13vw), -50%) translateY(-8px); }
   }
   .watchItem.posCenter { width: min(240px, 34vw); }
+
+  /* Evita que "Oferta do dia" sobreponha a imagem em resoluções médias */
+  .stagePromotion {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    padding-top: 16px;
+  }
+  .stagePromotion .posLeft,
+  .stagePromotion .posRight {
+    display: none;
+  }
+  .stagePromotion .promoTop {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    order: 1;
+    width: min(90vw, 360px);
+    gap: 4px;
+  }
+  .stagePromotion .phoneItem.posCenter {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    order: 2;
+    width: min(42vw, 200px);
+    margin: 0;
+    animation: none;
+  }
+  .stagePromotion .carousel {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    order: 3;
+    width: min(90vw, 360px);
+    max-width: 90vw;
+  }
 }
 
 @media (max-width: 540px) {

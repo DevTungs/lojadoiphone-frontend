@@ -275,6 +275,170 @@
   border-top: 1px solid var(--gray-100);
 }
 
+/* ── Seção de Precificação ── */
+.priceSection {
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  background: var(--gray-50);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.priceSectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--gray-700);
+}
+
+/* Linha custo | venda */
+.priceRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.priceField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Barra de calculadora de % */
+.calcBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+}
+
+.calcLabel {
+  font-size: 12px;
+  color: var(--gray-500);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+}
+
+.calcModeBtn {
+  display: none;
+}
+
+.calcModeBtnActive {
+  display: none;
+}
+
+.calcInputWrapper {
+  position: relative;
+  width: 100px;
+  flex-shrink: 0;
+}
+
+.calcInput {
+  width: 100%;
+  padding: 5px 28px 5px 10px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-family: var(--font);
+  color: var(--gray-900);
+  outline: none;
+  background: var(--white);
+  box-sizing: border-box;
+  transition: var(--transition-fast);
+}
+
+.calcInput:focus {
+  border-color: var(--mint);
+  box-shadow: 0 0 0 3px var(--mint-alpha-10);
+}
+
+.calcInputSuffix {
+  position: absolute;
+  right: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: var(--gray-400);
+  pointer-events: none;
+}
+
+.calcHint {
+  font-size: 11px;
+  color: var(--gray-400);
+  white-space: nowrap;
+}
+
+/* ── Resumo de Margem ── */
+.marginSummary {
+  display: flex;
+  align-items: center;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.marginSummaryItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 8px;
+  gap: 3px;
+}
+
+.marginSummaryDivider {
+  width: 1px;
+  height: 36px;
+  background: var(--gray-100);
+  flex-shrink: 0;
+}
+
+.marginSummaryLabel {
+  font-size: 10px;
+  font-weight: var(--weight-semibold);
+  color: var(--gray-400);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.marginSummaryValue {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: var(--gray-800);
+}
+
+.colorProfit { color: #16a34a; }
+.colorLoss   { color: var(--red-500); }
+.colorGood   { color: #16a34a; }
+.colorOk     { color: #d97706; }
+.colorWarn   { color: var(--red-500); }
+
+/* ── Tabela: custo e margem ── */
+.costCell { color: var(--gray-600); }
+.noCost   { color: var(--gray-300); }
+
+.marginBadge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: var(--weight-semibold);
+}
+
+.marginGood { background: #dcfce7; color: #15803d; }
+.marginOk   { background: #fef9c3; color: #a16207; }
+.marginLow  { background: #fee2e2; color: #dc2626; }
+
+
 /* ── Upload de imagem ── */
 .imageTabs {
   display: flex;
@@ -410,6 +574,10 @@
 
   .formGridFull {
     grid-column: auto;
+  }
+
+  .priceGrid {
+    grid-template-columns: 1fr;
   }
 
   .modalFooter {

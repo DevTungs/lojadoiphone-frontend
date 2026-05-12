@@ -147,6 +147,11 @@ export const updateOrderStatus = (
   status: number
 ): Promise<{ data: Order }> => api.patch(`/orders/${id}/status`, { status });
 
+export const updateOrderPrices = (
+  id: number,
+  data: { cost_price?: number | null; total_price?: number }
+): Promise<{ data: Order }> => api.patch(`/orders/${id}/prices`, data);
+
 export const generateOrderPixPayment = (
   id: number
 ): Promise<{ data: PixPaymentResponse }> => api.post(`/orders/${id}/payment/pix`);

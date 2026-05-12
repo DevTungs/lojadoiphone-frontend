@@ -6,6 +6,7 @@ export interface Product {
   name: string;
   description: string;
   price: number;
+  cost_price?: number | null;
   storage: string;
   color: string;
   image_url: string;
@@ -52,6 +53,7 @@ export interface Order {
   seller_name?: string;
   status: number;
   total_price: number;
+  cost_price?: number | null;
   created_at: string;
   delivery_full_name?: string;
   delivery_zip_code?: string;

@@ -6,7 +6,7 @@ import Spinner from '../../../components/atoms/Spinner/Spinner'
 import TableSkeleton from '../../../components/atoms/TableSkeleton/TableSkeleton'
 import Toast from '../../../components/atoms/Toast/Toast'
 import { useToast } from '../../../hooks/useToast'
-import { getOrders, getOrder, updateOrderStatus, generateOrderPixPayment, getSettings } from '../../../services/api'
+import { getOrders, getOrder, updateOrderStatus, updateOrderPrices, generateOrderPixPayment, getSettings } from '../../../services/api'
 import PixPaymentModal from '../../../components/organisms/PixPaymentModal/PixPaymentModal'
 import {
   formatCurrency,
@@ -98,6 +98,10 @@ export default function AdminOrders() {
   const [detailLoading, setDetailLoading] = useState(false)
   const [newStatus, setNewStatus] = useState<number>(0)
   const [saving, setSaving] = useState(false)
+  const [editCostPrice, setEditCostPrice] = useState<number>(0)
+  const [editSalePrice, setEditSalePrice] = useState<number>(0)
+  const [editMargin, setEditMargin] = useState<number>(0)
+  const [savingPrices, setSavingPrices] = useState(false)
   const [inlineSaving, setInlineSaving] = useState<number | null>(null)
   const [pixLoadingOrderId, setPixLoadingOrderId] = useState<number | null>(null)
   const [pixModalData, setPixModalData] = useState<PixModalState | null>(null)
@@ -143,15 +147,29 @@ export default function AdminOrders() {
     fetchOrders()
   }, [])
 
+  function updatePricingState(orderToUse: Order) {
+    const cost = orderToUse.cost_price || 0;
+    const sale = orderToUse.total_price || 0;
+    setEditCostPrice(cost);
+    setEditSalePrice(sale);
+    if (cost > 0) {
+      setEditMargin(Math.round(((sale - cost) / cost) * 100));
+    } else {
+      setEditMargin(0);
+    }
+  }
+
   async function openOrderDetail(order: Order) {
     setDetailLoading(true)
     try {
       const res = await getOrder(order.id)
       setSelectedOrder(res.data)
       setNewStatus(res.data.status)
+      updatePricingState(res.data)
     } catch {
       setSelectedOrder(order)
       setNewStatus(order.status)
+      updatePricingState(order)
     } finally {
       setDetailLoading(false)
     }
@@ -217,6 +235,45 @@ export default function AdminOrders() {
       addToast('error', 'Falha ao gerar cobrança PIX para o pedido.')
     } finally {
       setPixLoadingOrderId(null)
+    }
+  }
+
+  function handleCostChange(val: string) {
+    const cost = Number(val) || 0;
+    setEditCostPrice(cost);
+    if (cost > 0 && editMargin > 0) {
+      setEditSalePrice(cost * (1 + editMargin / 100));
+    }
+  }
+
+  function handleMarginChange(val: string) {
+    const margin = Number(val) || 0;
+    setEditMargin(margin);
+    if (editCostPrice > 0) {
+      setEditSalePrice(editCostPrice * (1 + margin / 100));
+    }
+  }
+
+  function handleSaleChange(val: string) {
+    const sale = Number(val) || 0;
+    setEditSalePrice(sale);
+    if (editCostPrice > 0) {
+      setEditMargin(Math.round(((sale - editCostPrice) / editCostPrice) * 100));
+    }
+  }
+
+  async function handleSavePrices() {
+    if (!selectedOrder) return;
+    setSavingPrices(true);
+    try {
+      await updateOrderPrices(selectedOrder.id, { cost_price: editCostPrice, total_price: editSalePrice });
+      setOrders(prev => prev.map(o => o.id === selectedOrder.id ? { ...o, cost_price: editCostPrice, total_price: editSalePrice } : o));
+      setSelectedOrder({ ...selectedOrder, cost_price: editCostPrice, total_price: editSalePrice });
+      addToast('success', 'Preços atualizados!');
+    } catch {
+      addToast('error', 'Erro ao atualizar preços.');
+    } finally {
+      setSavingPrices(false);
     }
   }
 
@@ -528,6 +585,27 @@ export default function AdminOrders() {
                     </div>
                   </div>
                 )}
+
+                <div className={styles.pricingSection}>
+                  <h3 className={styles.sectionTitle}>Custo e Precificação</h3>
+                  <div className={styles.pricingGrid}>
+                    <div className={styles.pricingItem}>
+                      <label className={styles.pricingLabel}>Preço Custo (R$)</label>
+                      <input type="number" step="0.01" className={styles.pricingInput} value={editCostPrice || ''} onChange={e => handleCostChange(e.target.value)} />
+                    </div>
+                    <div className={styles.pricingItem}>
+                      <label className={styles.pricingLabel}>Margem (%)</label>
+                      <input type="number" step="1" className={styles.pricingInput} value={editMargin || ''} onChange={e => handleMarginChange(e.target.value)} />
+                    </div>
+                    <div className={styles.pricingItem}>
+                      <label className={styles.pricingLabel}>Preço Venda (R$)</label>
+                      <input type="number" step="0.01" className={styles.pricingInput} value={editSalePrice || ''} onChange={e => handleSaleChange(e.target.value)} />
+                    </div>
+                  </div>
+                  <Button onClick={handleSavePrices} disabled={savingPrices || (editCostPrice === (selectedOrder.cost_price || 0) && editSalePrice === selectedOrder.total_price)} className={styles.savePricingBtn}>
+                    {savingPrices ? 'Salvando...' : 'Salvar preços'}
+                  </Button>
+                </div>
 
                 <div className={styles.statusSection}>
                   <h3 className={styles.sectionTitle}>Atualizar Status</h3>

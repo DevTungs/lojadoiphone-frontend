@@ -407,8 +407,8 @@ export default function CustomerAccount() {
                     <label className={styles.fieldLabel}>Telefone</label>
                     <Input
                       value={editData.phone}
-                      onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
-                      placeholder="+55 11 99999-9999"
+                      onChange={(e) => setEditData({ ...editData, phone: e.target.value.replace(/\D/g, '') })}
+                      placeholder="Ex: 5511999999999"
                       type="tel"
                     />
                   </div>

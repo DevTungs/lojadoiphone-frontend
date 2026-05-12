@@ -49,9 +49,9 @@ export default function CustomerLogin() {
               id="phone"
               type="tel"
               className={styles.input}
-              placeholder="+55 11 99999-9999"
+              placeholder="Ex: 5511999999999"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
               required
               autoComplete="tel"
             />

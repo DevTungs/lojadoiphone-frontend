@@ -354,8 +354,8 @@ export default function AdminSellers() {
                 <label className={styles.fieldLabel}>Telefone</label>
                 <Input
                   value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  placeholder="+55 11 99999-9999"
+                  onChange={(e) => setForm({ ...form, phone: e.target.value.replace(/\D/g, '') })}
+                  placeholder="Ex: 5511999999999"
                   type="tel"
                 />
               </div>

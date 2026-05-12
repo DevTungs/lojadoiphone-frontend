@@ -214,11 +214,11 @@ export default function AdminSettings() {
               <label className={styles.label}>WhatsApp</label>
               <Input
                 value={form.whatsapp}
-                onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
-                placeholder="+55 11 99999-9999"
+                onChange={(e) => setForm({ ...form, whatsapp: e.target.value.replace(/\D/g, '') })}
+                placeholder="Ex: 5511999999999"
                 type="tel"
               />
-              <p className={styles.hint}>Com código do país (ex: +55 para Brasil, +595 para Paraguai)</p>
+              <p className={styles.hint}>Apenas números com código do país (ex: 55 para Brasil, 595 para Paraguai)</p>
             </div>
 
             {/* Palavra de verificação */}

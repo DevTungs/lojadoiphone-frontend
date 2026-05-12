@@ -18,6 +18,7 @@ import AdminSellers from './pages/Admin/Sellers'
 import AdminSettings from './pages/Admin/Settings'
 import AdminCustomers from './pages/Admin/Customers/AdminCustomers'
 import AdminPromotions from './pages/Admin/Promotions/AdminPromotions'
+import AdminDeposits from './pages/Admin/Deposits/AdminDeposits'
 import Products from './pages/Products/Products'
 import SellerPage from './pages/SellerPage/SellerPage'
 import Checkout from './pages/Checkout/Checkout'
@@ -114,6 +115,14 @@ function AppContent() {
               element={
                 <ProtectedRoute>
                   <AdminPromotions />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/depositos"
+              element={
+                <ProtectedRoute>
+                  <AdminDeposits />
                 </ProtectedRoute>
               }
             />

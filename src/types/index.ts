@@ -117,3 +117,31 @@ export interface Promotion {
   sort_order: number;
   created_at: string;
 }
+
+export interface TcrDeposit {
+  id: number;
+  quantia: number;
+  data: string;
+  status_nome: string;
+  status_codigo_referencia: string;
+  moeda_nome: string;
+  moeda_sigla: string;
+  moeda_logo: string;
+  moeda_is_cripto: boolean;
+  rede_nome: string | null;
+  wallet_address: string | null;
+  hash: string | null;
+  comprovante_hash: string | null;
+  chave_pix: string | null;
+  usuario_email: string;
+  usuario_nome: string;
+}
+
+export interface TcrDepositsPaginated {
+  itens_total: number;
+  paginas_total: number;
+  pagina_atual: number;
+  proxima_pagina: number | null;
+  por_pagina: number;
+  depositos: TcrDeposit[];
+}

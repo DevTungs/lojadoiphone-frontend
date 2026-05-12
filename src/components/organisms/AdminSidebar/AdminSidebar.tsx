@@ -9,6 +9,7 @@ import {
   Settings,
   LogOut,
   Tag,
+  Wallet,
   X,
 } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -27,6 +28,7 @@ const navItems: NavItem[] = [
   { label: 'Vendedores', path: '/admin/vendedores', icon: <Users size={18} /> },
   { label: 'Clientes', path: '/admin/clientes', icon: <UserCircle size={18} /> },
   { label: 'Promoções', path: '/admin/promocoes', icon: <Tag size={18} /> },
+  { label: 'Depósitos', path: '/admin/depositos', icon: <Wallet size={18} /> },
   { label: 'Configurações', path: '/admin/configuracoes', icon: <Settings size={18} /> },
 ];
 

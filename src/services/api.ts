@@ -9,6 +9,7 @@ import type {
   Stats,
   Customer,
   Promotion,
+  TcrDepositsPaginated,
 } from '../types/index';
 
 const rawApiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -248,6 +249,16 @@ export interface LoginResponse {
     role: string;
   };
 }
+
+// ─── Deposits ────────────────────────────────────────────────────────────────
+
+export const getDeposits = (params?: {
+  pagina?: number;
+  por_pagina?: number;
+  data_inicial?: number;
+  data_final?: number;
+}): Promise<{ data: TcrDepositsPaginated }> =>
+  api.get('/depositos', { params });
 
 // ─── Promotions ──────────────────────────────────────────────────────────────
 

@@ -29,6 +29,10 @@ const Products: React.FC = () => {
   );
 
   useEffect(() => {
+    setActiveCategory(searchParams.get('categoria') ?? 'Todos');
+  }, [searchParams]);
+
+  useEffect(() => {
     Promise.all([getProducts(), getSettings()])
       .then(([productsRes, settingsRes]) => {
         setProducts(productsRes.data);

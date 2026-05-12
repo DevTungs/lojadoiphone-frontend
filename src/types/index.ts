@@ -130,6 +130,8 @@ export interface TcrDeposit {
   moeda_is_cripto: boolean;
   rede_nome: string | null;
   wallet_address: string | null;
+  nome_bb_colaborador?: string | null;
+  documento_bb_colaborador?: string | null;
   hash: string | null;
   comprovante_hash: string | null;
   chave_pix: string | null;

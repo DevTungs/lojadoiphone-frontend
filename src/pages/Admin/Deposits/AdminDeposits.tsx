@@ -163,7 +163,7 @@ export default function AdminDeposits() {
           <thead>
             <tr>
               <th>#ID</th>
-              <th>Cliente</th>
+              <th>Pagador / Origem</th>
               <th>Quantia</th>
               <th>Moeda</th>
               <th>Método / Rede</th>
@@ -180,8 +180,18 @@ export default function AdminDeposits() {
                   <td className={styles.idCol}>#{deposito.id}</td>
                   <td>
                     <div className={styles.customerInfo}>
-                      <span className={styles.customerName}>{deposito.usuario_nome}</span>
-                      <span className={styles.customerEmail}>{deposito.usuario_email}</span>
+                      <span className={styles.customerName}>
+                        {deposito.nome_bb_colaborador || deposito.wallet_address || 'Origem Desconhecida'}
+                      </span>
+                      <span className={styles.customerEmail}>
+                        {deposito.documento_bb_colaborador 
+                          ? `Doc: ${deposito.documento_bb_colaborador}` 
+                          : (deposito.moeda_is_cripto ? 'Endereço Cripto' : deposito.chave_pix || 'PIX')
+                        }
+                      </span>
+                    </div>
+                    <div style={{ marginTop: 4, fontSize: '0.65rem', color: '#8b949e', textTransform: 'uppercase' }}>
+                      Recebedor: {deposito.usuario_nome}
                     </div>
                   </td>
                   <td className={styles.amountCol}>

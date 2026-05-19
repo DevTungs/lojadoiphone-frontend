@@ -46,7 +46,6 @@ export default function AdminDeposits() {
         data_final = toDate.getTime();
       }
 
-      console.log('[Depósitos] Enviando:', { pagina: currentPage, data_inicial, data_final });
       const res = await getDeposits({
         pagina: currentPage,
         por_pagina: 15,
@@ -54,7 +53,6 @@ export default function AdminDeposits() {
         data_final,
         ...(isRefresh ? { _t: Date.now() } : {})
       });
-      console.log('[Depósitos] Resposta:', { itens_total: res.data.itens_total, depositos: res.data.depositos?.length });
       
       setData(res.data);
       if (isRefresh) {

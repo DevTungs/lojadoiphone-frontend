@@ -34,11 +34,14 @@ export default function AdminDeposits() {
       let data_inicial: string | undefined;
       let data_final: string | undefined;
 
+      // Converte YYYY-MM-DD para DD/MM/YYYY (formato brasileiro)
       if (from) {
-        data_inicial = from; // Formato YYYY-MM-DD
+        const [y, m, d] = from.split('-');
+        data_inicial = `${d}/${m}/${y}`;
       }
       if (to) {
-        data_final = to; // Formato YYYY-MM-DD
+        const [y, m, d] = to.split('-');
+        data_final = `${d}/${m}/${y}`;
       }
 
       console.log('[Depósitos] Enviando:', { pagina: currentPage, data_inicial, data_final });

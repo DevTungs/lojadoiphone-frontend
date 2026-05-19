@@ -31,19 +31,17 @@ export default function AdminDeposits() {
     }
     
     try {
-      let data_inicial: number | undefined;
-      let data_final: number | undefined;
+      let data_inicial: string | undefined;
+      let data_final: string | undefined;
 
       if (from) {
-        // Converte para segundos (API TCR espera timestamp em segundos)
-        data_inicial = Math.floor(new Date(from).getTime() / 1000);
+        data_inicial = from; // Formato YYYY-MM-DD
       }
       if (to) {
-        const toDate = new Date(to);
-        toDate.setHours(23, 59, 59, 999);
-        data_final = Math.floor(toDate.getTime() / 1000);
+        data_final = to; // Formato YYYY-MM-DD
       }
 
+      console.log('[Depósitos] Enviando:', { pagina: currentPage, data_inicial, data_final });
       const res = await getDeposits({
         pagina: currentPage,
         por_pagina: 15,
@@ -51,6 +49,7 @@ export default function AdminDeposits() {
         data_final,
         ...(isRefresh ? { _t: Date.now() } : {})
       });
+      console.log('[Depósitos] Resposta:', { itens_total: res.data.itens_total, depositos: res.data.depositos?.length });
       
       setData(res.data);
       if (isRefresh) {

@@ -257,8 +257,8 @@ export interface LoginResponse {
 export const getDeposits = (params?: {
   pagina?: number;
   por_pagina?: number;
-  data_inicial?: number;
-  data_final?: number;
+  data_inicial?: string;
+  data_final?: string;
 }): Promise<{ data: TcrDepositsPaginated }> =>
   api.get('/depositos', { params });
 

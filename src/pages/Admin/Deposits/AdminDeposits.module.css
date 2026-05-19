@@ -10,8 +10,8 @@
 .filterBar {
   background: white;
   padding: 1rem;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--gray-200);
   flex-grow: 1;
 }
 
@@ -29,33 +29,33 @@
 }
 
 .dateLabel {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  font-weight: 600;
+  font-size: var(--text-xs);
+  color: var(--gray-500);
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .dateInput {
   padding: 9px 12px;
-  border: 1.5px solid var(--gray-300, #d1d5db);
-  border-radius: var(--radius-md, 10px);
-  font-size: var(--text-sm, 0.875rem);
+  border: 1.5px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
   font-family: var(--font);
-  color: var(--gray-800, #1f2937);
-  background: var(--white, white);
+  color: var(--gray-800);
+  background: var(--white);
   outline: none;
   cursor: pointer;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .dateInput:hover {
-  border-color: var(--gray-400, #9ca3af);
+  border-color: var(--gray-400);
 }
 
 .dateInput:focus {
-  border-color: var(--mint, #19c6a3);
-  box-shadow: 0 0 0 3px var(--mint-alpha-10, rgba(25, 198, 163, 0.10));
+  border-color: var(--mint);
+  box-shadow: 0 0 0 3px var(--mint-alpha-10);
 }
 
 .filterButtons {
@@ -68,18 +68,18 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background: var(--primary-color);
+  background: var(--mint);
   color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 500;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .searchBtn:hover {
-  background: var(--primary-dark);
+  background: var(--mint-dark);
 }
 
 .clearBtn {
@@ -87,18 +87,18 @@
   align-items: center;
   padding: 0.5rem 1rem;
   background: transparent;
-  color: var(--text-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 500;
+  color: var(--gray-500);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .clearBtn:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+  background: var(--gray-100);
+  color: var(--gray-800);
 }
 
 .refreshBtn {
@@ -110,8 +110,8 @@
 
 .tableWrapper {
   background: white;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--gray-200);
   overflow-x: auto;
 }
 
@@ -122,22 +122,22 @@
 }
 
 .table th {
-  background: var(--bg-hover);
+  background: var(--gray-50);
   padding: 1rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-secondary);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--gray-500);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--gray-200);
   white-space: nowrap;
 }
 
 .table td {
   padding: 1rem;
-  font-size: 0.875rem;
-  color: var(--text-primary);
-  border-bottom: 1px solid var(--border-color);
+  font-size: var(--text-sm);
+  color: var(--gray-800);
+  border-bottom: 1px solid var(--gray-200);
   vertical-align: middle;
 }
 
@@ -146,20 +146,20 @@
 }
 
 .table tr:hover td {
-  background: var(--bg-hover);
+  background: var(--gray-50);
 }
 
 .emptyRow {
   text-align: center;
   padding: 3rem 1rem !important;
-  color: var(--text-secondary) !important;
+  color: var(--gray-500) !important;
   font-style: italic;
 }
 
 .idCol {
   font-family: monospace;
-  color: var(--text-secondary) !important;
-  font-weight: 500;
+  color: var(--gray-500) !important;
+  font-weight: var(--weight-medium);
 }
 
 .customerInfo {
@@ -168,18 +168,18 @@
 }
 
 .customerName {
-  font-weight: 500;
-  color: var(--text-primary);
+  font-weight: var(--weight-medium);
+  color: var(--gray-800);
 }
 
 .customerEmail {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
+  font-size: var(--text-xs);
+  color: var(--gray-500);
 }
 
 .amountCol {
-  font-weight: 600;
-  color: var(--text-primary);
+  font-weight: var(--weight-semibold);
+  color: var(--gray-800);
 }
 
 .currencyBadge {
@@ -198,12 +198,12 @@
 .networkBadge {
   display: inline-block;
   padding: 0.25rem 0.5rem;
-  background: var(--bg-hover);
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-secondary);
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-xs);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--gray-500);
 }
 
 .statusBadge {
@@ -211,9 +211,9 @@
   align-items: center;
   gap: 0.375rem;
   padding: 0.25rem 0.625rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
 }
 
 .badgePending {
@@ -236,7 +236,7 @@
 }
 
 .dateCol {
-  color: var(--text-secondary) !important;
+  color: var(--gray-500) !important;
   white-space: nowrap;
 }
 
@@ -247,13 +247,13 @@
   margin-top: 1.5rem;
   padding: 1rem;
   background: white;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--gray-200);
 }
 
 .paginationInfo {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  color: var(--gray-500);
 }
 
 .paginationControls {
@@ -268,18 +268,18 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  border-radius: 6px;
-  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--gray-200);
   background: white;
-  color: var(--text-primary);
+  color: var(--gray-800);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .pageBtn:hover:not(:disabled) {
-  background: var(--bg-hover);
-  color: var(--primary-color);
-  border-color: var(--primary-color);
+  background: var(--gray-100);
+  color: var(--mint);
+  border-color: var(--mint);
 }
 
 .pageBtn:disabled {
@@ -288,9 +288,9 @@
 }
 
 .pageCurrent {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--gray-800);
   min-width: 20px;
   text-align: center;
 }

@@ -35,12 +35,13 @@ export default function AdminDeposits() {
       let data_final: number | undefined;
 
       if (from) {
-        data_inicial = new Date(from).getTime();
+        // Converte para segundos (API TCR espera timestamp em segundos)
+        data_inicial = Math.floor(new Date(from).getTime() / 1000);
       }
       if (to) {
         const toDate = new Date(to);
         toDate.setHours(23, 59, 59, 999);
-        data_final = toDate.getTime();
+        data_final = Math.floor(toDate.getTime() / 1000);
       }
 
       const res = await getDeposits({

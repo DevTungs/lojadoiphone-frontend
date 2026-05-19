@@ -399,14 +399,20 @@
 }
 
 .dateInput {
-  padding: 8px 12px;
-  border: 1px solid var(--gray-300);
-  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  border: 1.5px solid var(--gray-300);
+  border-radius: var(--radius-md);
   font-size: var(--text-sm);
-  color: var(--gray-700);
+  font-family: var(--font);
+  color: var(--gray-800);
   background: var(--white);
   outline: none;
-  transition: var(--transition-fast);
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dateInput:hover {
+  border-color: var(--gray-400);
 }
 
 .dateInput:focus {

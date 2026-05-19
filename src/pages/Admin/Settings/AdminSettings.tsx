@@ -211,7 +211,7 @@ export default function AdminSettings() {
 
             {/* WhatsApp */}
             <div className={styles.field}>
-              <label className={styles.label}>WhatsApp</label>
+              <label className={styles.label}>WhatsApp do financeiro</label>
               <Input
                 value={form.whatsapp}
                 onChange={(e) => setForm({ ...form, whatsapp: e.target.value.replace(/\D/g, '') })}

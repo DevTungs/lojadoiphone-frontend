@@ -55,10 +55,13 @@
   background-position: right 12px center;
 }
 
-.sortWrapper select:focus,
 .sortWrapper select:hover {
+  border-color: var(--gray-400);
+}
+
+.sortWrapper select:focus {
   border-color: var(--mint);
-  box-shadow: 0 0 0 3px rgba(0, 209, 163, 0.1);
+  box-shadow: 0 0 0 3px var(--mint-alpha-10, rgba(25, 198, 163, 0.10));
 }
 
 .grid {

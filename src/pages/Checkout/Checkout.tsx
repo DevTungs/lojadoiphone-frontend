@@ -18,8 +18,6 @@ import styles from './Checkout.module.css';
 
 interface CheckoutFormData {
   deliveryFullName: string;
-  pickupCity: string;
-  pickupState: string;
   pickupPhone: string;
   deliveryReference: string;
 }
@@ -49,8 +47,6 @@ const Checkout: React.FC = () => {
 
   const [checkoutForm, setCheckoutForm] = useState<CheckoutFormData>({
     deliveryFullName: customer?.name ?? '',
-    pickupCity: '',
-    pickupState: '',
     pickupPhone: customer?.phone ?? '',
     deliveryReference: '',
   });
@@ -96,8 +92,6 @@ const Checkout: React.FC = () => {
 
     if (!selectedSellerId) nextErrors.seller = 'Selecione um vendedor';
     if (!checkoutForm.deliveryFullName.trim()) nextErrors.deliveryFullName = 'Informe o nome completo';
-    if (!checkoutForm.pickupCity.trim()) nextErrors.pickupCity = 'Informe a cidade';
-    if (!checkoutForm.pickupState.trim()) nextErrors.pickupState = 'Informe o estado';
     if (!checkoutForm.pickupPhone.trim()) nextErrors.pickupPhone = 'Informe o telefone';
 
     setErrors(nextErrors);
@@ -126,8 +120,6 @@ const Checkout: React.FC = () => {
         checkout_phone: checkoutForm.pickupPhone.trim(),
         seller_id: selectedSellerId,
         delivery_full_name: checkoutForm.deliveryFullName.trim(),
-        delivery_city: checkoutForm.pickupCity.trim(),
-        delivery_state: checkoutForm.pickupState.trim(),
         delivery_reference: checkoutForm.deliveryReference.trim(),
         payment_method: 'tcr_pix',
         items: cartItems.map((item) => ({
@@ -177,7 +169,7 @@ const Checkout: React.FC = () => {
               <span className={styles.badge}><MapPin size={14} /> Somente retirada</span>
             </div>
             <p className={styles.cardHint}>
-              Preencha os dados da pessoa que fará a retirada. O pagamento é via PIX.
+              Preencha os dados da pessoa que fará a retirada.
             </p>
 
             <div className={styles.formGrid}>
@@ -195,22 +187,6 @@ const Checkout: React.FC = () => {
                 onChange={(e) => updateCheckoutField('pickupPhone', e.target.value)}
                 error={errors.pickupPhone}
                 placeholder="(DDD) 90000-0000"
-              />
-
-              <Input
-                label="Cidade"
-                value={checkoutForm.pickupCity}
-                onChange={(e) => updateCheckoutField('pickupCity', e.target.value)}
-                error={errors.pickupCity}
-                placeholder="Cidade"
-              />
-
-              <Input
-                label="Estado"
-                value={checkoutForm.pickupState}
-                onChange={(e) => updateCheckoutField('pickupState', e.target.value.toUpperCase())}
-                error={errors.pickupState}
-                placeholder="UF"
               />
 
               <Input
@@ -279,7 +255,7 @@ const Checkout: React.FC = () => {
               onClick={handleSubmit}
               disabled={isSubmitting || cartItems.length === 0}
             >
-              {isSubmitting ? <><Loader2 size={16} className={styles.spin} /> Criando pedido...</> : <><QrCode size={16} /> Pagar com PIX</>}
+              {isSubmitting ? <><Loader2 size={16} className={styles.spin} /> Criando pedido...</> : <><QrCode size={16} /> Pagar com QR Code</>}
             </button>
           </aside>
         </div>

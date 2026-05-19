@@ -37,19 +37,25 @@
 }
 
 .dateInput {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  font-size: 0.875rem;
-  color: var(--text-primary);
-  background: white;
-  transition: all 0.2s;
+  padding: 9px 12px;
+  border: 1.5px solid var(--gray-300, #d1d5db);
+  border-radius: var(--radius-md, 10px);
+  font-size: var(--text-sm, 0.875rem);
+  font-family: var(--font);
+  color: var(--gray-800, #1f2937);
+  background: var(--white, white);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dateInput:hover {
+  border-color: var(--gray-400, #9ca3af);
 }
 
 .dateInput:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.1);
+  border-color: var(--mint, #19c6a3);
+  box-shadow: 0 0 0 3px var(--mint-alpha-10, rgba(25, 198, 163, 0.10));
 }
 
 .filterButtons {

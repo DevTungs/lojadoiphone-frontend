@@ -39,7 +39,9 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const hasAdminSession = Boolean(localStorage.getItem('auth_token'));
-    if (error.response?.status === 401 && hasAdminSession) {
+    const url: string = error.config?.url ?? '';
+    const skipLogout = url.includes('/orders/payment/webhooks') || url.includes('/depositos');
+    if (error.response?.status === 401 && hasAdminSession && !skipLogout) {
       localStorage.removeItem('auth_token');
       localStorage.removeItem('auth_user');
       window.location.href = '/admin/login';

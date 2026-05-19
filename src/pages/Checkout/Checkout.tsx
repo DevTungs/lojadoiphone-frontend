@@ -33,10 +33,17 @@ const Checkout: React.FC = () => {
 
   const [settings, setSettings] = useState<StoreSettings | null>(null);
   const [sellers, setSellers] = useState<Seller[]>([]);
-  const [selectedSellerId, setSelectedSellerId] = useState<string>(() => {
-    const state = location.state as { preselectedSellerId?: string } | null;
-    return state?.preselectedSellerId || '';
-  });
+  const checkoutState = location.state as {
+    preselectedSellerId?: string;
+    preselectedSellerName?: string;
+    lockSeller?: boolean;
+  } | null;
+
+  const [selectedSellerId, setSelectedSellerId] = useState<string>(
+    checkoutState?.preselectedSellerId ?? ''
+  );
+  const isSellerLocked = checkoutState?.lockSeller ?? false;
+  const lockedSellerName = checkoutState?.preselectedSellerName;
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -215,23 +222,29 @@ const Checkout: React.FC = () => {
 
               <div className={styles.sellerWrap}>
                 <label className={styles.label}>Vendedor</label>
-                <select
-                  className={`${styles.select} ${errors.seller ? styles.selectError : ''}`}
-                  value={selectedSellerId}
-                  onChange={(e) => {
-                    setSelectedSellerId(e.target.value);
-                    setErrors((prev) => {
-                      const next = { ...prev };
-                      delete next.seller;
-                      return next;
-                    });
-                  }}
-                >
-                  <option value="">Selecione um vendedor</option>
-                  {sellers.map((seller) => (
-                    <option key={seller.id} value={seller.id}>{seller.name}</option>
-                  ))}
-                </select>
+                {isSellerLocked ? (
+                  <div className={styles.lockedSeller}>
+                    {lockedSellerName ?? sellers.find((s) => String(s.id) === String(selectedSellerId))?.name ?? '...'}
+                  </div>
+                ) : (
+                  <select
+                    className={`${styles.select} ${errors.seller ? styles.selectError : ''}`}
+                    value={selectedSellerId}
+                    onChange={(e) => {
+                      setSelectedSellerId(e.target.value);
+                      setErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.seller;
+                        return next;
+                      });
+                    }}
+                  >
+                    <option value="">Selecione um vendedor</option>
+                    {sellers.map((seller) => (
+                      <option key={seller.id} value={seller.id}>{seller.name}</option>
+                    ))}
+                  </select>
+                )}
                 {errors.seller && <span className={styles.error}>{errors.seller}</span>}
               </div>
             </div>

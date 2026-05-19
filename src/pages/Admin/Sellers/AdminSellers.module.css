@@ -400,7 +400,7 @@
 
 .dateInput {
   padding: 8px 12px;
-  border: 1px solid var(--gray-200);
+  border: 1px solid var(--gray-300);
   border-radius: var(--radius-sm);
   font-size: var(--text-sm);
   color: var(--gray-700);

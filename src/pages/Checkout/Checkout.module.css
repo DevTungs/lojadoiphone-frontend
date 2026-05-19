@@ -111,6 +111,17 @@
   border-color: #ef4444;
 }
 
+.lockedSeller {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--color-gray-300, #d1d5db);
+  border-radius: 10px;
+  font-size: 14px;
+  background: var(--color-gray-50, #f9fafb);
+  color: var(--color-gray-700, #374151);
+  font-weight: 500;
+}
+
 .error {
   font-size: 12px;
   color: #ef4444;

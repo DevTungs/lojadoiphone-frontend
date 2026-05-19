@@ -4,13 +4,14 @@ import AdminLayout from '../../../components/templates/AdminLayout/AdminLayout'
 import SellerRanking from '../../../components/organisms/SellerRanking/SellerRanking'
 import Spinner from '../../../components/atoms/Spinner/Spinner'
 import { getStats, getSellersRanking, getOrders, getDashboardStats, getSellerPerformance, getProductPerformance } from '../../../services/api'
+import type { StatsParams } from '../../../services/api'
 import { formatCurrency } from '../../../utils/formatters'
 import type { Stats, Seller, Order } from '../../../types/index'
 import styles from './Dashboard.module.css'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Period = 'today' | 'week' | 'month' | 'all'
+type Period = 'today' | 'week' | 'month' | 'all' | 'custom'
 
 interface SellerPerf {
   seller_id: number
@@ -42,17 +43,23 @@ export default function Dashboard() {
 
   // Filters
   const [period, setPeriod] = useState<Period>('month')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
   const [selectedSellers, setSelectedSellers] = useState<number[]>([]) // empty = all
 
   // ─── Fetch ──────────────────────────────────────────────────────────────────
 
   useEffect(() => {
     async function fetchData() {
+      const params: StatsParams = period === 'custom'
+        ? { date_from: dateFrom || undefined, date_to: dateTo || undefined }
+        : { period }
+
       try {
         const [dashRes, perfRes, prodRes, sellersRes, ordersRes] = await Promise.all([
-          getDashboardStats(period),
-          getSellerPerformance(period),
-          getProductPerformance(period),
+          getDashboardStats(params),
+          getSellerPerformance(params),
+          getProductPerformance(params),
           getSellersRanking(),
           getOrders(),
         ])
@@ -92,7 +99,7 @@ export default function Dashboard() {
       }
     }
     fetchData()
-  }, [period])
+  }, [period, dateFrom, dateTo])
 
   // ─── Derived data (filtering only) ────────────────────────────────────────────
 
@@ -144,6 +151,18 @@ export default function Dashboard() {
     setSelectedSellers([])
   }
 
+  function handlePeriodClick(p: Period) {
+    setPeriod(p)
+    setDateFrom('')
+    setDateTo('')
+  }
+
+  function handleDateChange(field: 'from' | 'to', value: string) {
+    if (field === 'from') setDateFrom(value)
+    else setDateTo(value)
+    setPeriod('custom')
+  }
+
   // ─── Render ──────────────────────────────────────────────────────────────────
 
   if (loading) {
@@ -166,7 +185,7 @@ export default function Dashboard() {
     )
   }
 
-  const periodLabels: Record<Period, string> = {
+  const periodLabels: Record<Exclude<Period, 'custom'>, string> = {
     today: 'Hoje',
     week: 'Esta semana',
     month: 'Este mês',
@@ -179,15 +198,36 @@ export default function Dashboard() {
       {/* ── Filtro de período ── */}
       <div className={styles.periodBar}>
         <Calendar size={16} className={styles.periodIcon} />
-        {(Object.keys(periodLabels) as Period[]).map((p) => (
+        {(Object.keys(periodLabels) as Exclude<Period, 'custom'>[]).map((p) => (
           <button
             key={p}
             className={`${styles.periodBtn} ${period === p ? styles.periodBtnActive : ''}`}
-            onClick={() => setPeriod(p)}
+            onClick={() => handlePeriodClick(p)}
           >
             {periodLabels[p]}
           </button>
         ))}
+
+        <div className={styles.dateRange}>
+          <div className={styles.dateField}>
+            <label className={styles.dateLabel}>De</label>
+            <input
+              type="date"
+              className={`${styles.dateInput} ${period === 'custom' && dateFrom ? styles.dateInputActive : ''}`}
+              value={dateFrom}
+              onChange={(e) => handleDateChange('from', e.target.value)}
+            />
+          </div>
+          <div className={styles.dateField}>
+            <label className={styles.dateLabel}>Até</label>
+            <input
+              type="date"
+              className={`${styles.dateInput} ${period === 'custom' && dateTo ? styles.dateInputActive : ''}`}
+              value={dateTo}
+              onChange={(e) => handleDateChange('to', e.target.value)}
+            />
+          </div>
+        </div>
       </div>
 
       {/* ── Cards de estatísticas ── */}

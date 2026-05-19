@@ -38,6 +38,56 @@
   color: var(--mint);
 }
 
+/* ── Date range inputs ─────────────────────────────────────────────────────── */
+
+.dateRange {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+  padding-left: 12px;
+  border-left: 1.5px solid var(--gray-100);
+}
+
+.dateField {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dateLabel {
+  font-size: 13px;
+  font-weight: var(--weight-medium);
+  color: var(--gray-500);
+  white-space: nowrap;
+}
+
+.dateInput {
+  padding: 7px 10px;
+  border-radius: 9999px;
+  border: 1.5px solid var(--gray-200);
+  background: var(--white);
+  font-size: 13px;
+  font-weight: var(--weight-medium);
+  color: var(--gray-700);
+  cursor: pointer;
+  transition: var(--transition);
+  outline: none;
+  font-family: inherit;
+}
+
+.dateInput:hover,
+.dateInput:focus {
+  border-color: var(--mint);
+  color: var(--gray-900);
+}
+
+.dateInputActive {
+  border-color: var(--mint);
+  background: rgba(25, 198, 163, 0.08);
+  color: var(--mint);
+}
+
 /* ── Stats grid ────────────────────────────────────────────────────────────── */
 
 .statsGrid {
@@ -238,6 +288,19 @@
   .periodBtn {
     padding: 7px 14px;
     font-size: 13px;
+  }
+
+  .dateRange {
+    margin-left: 0;
+    padding-left: 0;
+    border-left: none;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .dateInput {
+    font-size: 12px;
+    padding: 6px 8px;
   }
 
   .statCard {

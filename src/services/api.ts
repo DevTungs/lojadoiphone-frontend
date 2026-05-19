@@ -308,19 +308,25 @@ export interface ProductPerformance {
   total: number;
 }
 
-export const getDashboardStats = (
+export interface StatsParams {
   period?: 'today' | 'week' | 'month' | 'all'
+  date_from?: string
+  date_to?: string
+}
+
+export const getDashboardStats = (
+  params: StatsParams
 ): Promise<{ data: DashboardStats }> =>
-  api.get('/stats/dashboard', { params: period ? { period } : {} });
+  api.get('/stats/dashboard', { params });
 
 export const getSellerPerformance = (
-  period?: 'today' | 'week' | 'month' | 'all'
+  params: StatsParams
 ): Promise<{ data: SellerPerformance[] }> =>
-  api.get('/stats/sellers-performance', { params: period ? { period } : {} });
+  api.get('/stats/sellers-performance', { params });
 
 export const getProductPerformance = (
-  period?: 'today' | 'week' | 'month' | 'all'
+  params: StatsParams
 ): Promise<{ data: ProductPerformance[] }> =>
-  api.get('/stats/products-performance', { params: period ? { period } : {} });
+  api.get('/stats/products-performance', { params });
 
 export default api;

@@ -85,7 +85,15 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onLoginRequire
     if (!validate()) return;
 
     onClose();
-    navigate('/checkout', { state: { preselectedSellerId: selectedSellerId } });
+    navigate('/checkout', {
+      state: {
+        preselectedSellerId: selectedSellerId,
+        preselectedSellerName: lockSeller
+          ? (preselectedSellerName ?? sellers.find((s) => String(s.id) === String(selectedSellerId))?.name)
+          : undefined,
+        lockSeller: !!lockSeller,
+      },
+    });
   };
 
   return (

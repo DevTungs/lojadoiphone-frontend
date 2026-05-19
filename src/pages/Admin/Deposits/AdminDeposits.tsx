@@ -31,17 +31,19 @@ export default function AdminDeposits() {
     }
     
     try {
-      let data_inicial: string | undefined;
-      let data_final: string | undefined;
+      let data_inicial: number | undefined;
+      let data_final: number | undefined;
 
-      // Converte YYYY-MM-DD para DD/MM/YYYY (formato brasileiro)
       if (from) {
-        const [y, m, d] = from.split('-');
-        data_inicial = `${d}/${m}/${y}`;
+        // Cria data no fuso horário local (meia-noite local)
+        const [y, m, d] = from.split('-').map(Number);
+        data_inicial = new Date(y, m - 1, d).getTime();
       }
       if (to) {
-        const [y, m, d] = to.split('-');
-        data_final = `${d}/${m}/${y}`;
+        // Cria data no fuso horário local (final do dia local)
+        const [y, m, d] = to.split('-').map(Number);
+        const toDate = new Date(y, m - 1, d, 23, 59, 59, 999);
+        data_final = toDate.getTime();
       }
 
       console.log('[Depósitos] Enviando:', { pagina: currentPage, data_inicial, data_final });

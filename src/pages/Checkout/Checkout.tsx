@@ -90,7 +90,6 @@ const Checkout: React.FC = () => {
   const validate = (): boolean => {
     const nextErrors: Record<string, string> = {};
 
-    if (!selectedSellerId) nextErrors.seller = 'Selecione um vendedor';
     if (!checkoutForm.deliveryFullName.trim()) nextErrors.deliveryFullName = 'Informe o nome completo';
     if (!checkoutForm.pickupPhone.trim()) nextErrors.pickupPhone = 'Informe o telefone';
 
@@ -196,33 +195,14 @@ const Checkout: React.FC = () => {
                 placeholder="Ex.: retirar amanhã à tarde"
               />
 
-              <div className={styles.sellerWrap}>
-                <label className={styles.label}>Vendedor</label>
-                {isSellerLocked ? (
+              {selectedSellerId && (
+                <div className={styles.sellerWrap}>
+                  <label className={styles.label}>Vendedor</label>
                   <div className={styles.lockedSeller}>
                     {lockedSellerName ?? sellers.find((s) => String(s.id) === String(selectedSellerId))?.name ?? '...'}
                   </div>
-                ) : (
-                  <select
-                    className={`${styles.select} ${errors.seller ? styles.selectError : ''}`}
-                    value={selectedSellerId}
-                    onChange={(e) => {
-                      setSelectedSellerId(e.target.value);
-                      setErrors((prev) => {
-                        const next = { ...prev };
-                        delete next.seller;
-                        return next;
-                      });
-                    }}
-                  >
-                    <option value="">Selecione um vendedor</option>
-                    {sellers.map((seller) => (
-                      <option key={seller.id} value={seller.id}>{seller.name}</option>
-                    ))}
-                  </select>
-                )}
-                {errors.seller && <span className={styles.error}>{errors.seller}</span>}
-              </div>
+                </div>
+              )}
             </div>
           </article>
 

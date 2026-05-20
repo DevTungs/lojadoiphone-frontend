@@ -51,18 +51,6 @@ const SellerPage: React.FC = () => {
 
   return (
     <MainLayout settings={settings} onCartClick={() => setIsCartOpen(true)}>
-      {seller && (
-        <div className={styles.sellerBanner}>
-          {seller.photo_url && (
-            <img src={assetUrl(seller.photo_url)} alt={seller.name} className={styles.sellerAvatar} />
-          )}
-          <div>
-            <span className={styles.sellerLabel}>Vendedor</span>
-            <span className={styles.sellerName}>{seller.name}</span>
-          </div>
-        </div>
-      )}
-
       <section id="inicio">
         <HeroSection logoUrl={settings?.logo_url} storeName={settings?.store_name} />
       </section>
